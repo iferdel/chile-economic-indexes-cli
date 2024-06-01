@@ -7,12 +7,12 @@ import (
 )
 
 type config struct {
-	bccapiClient bcchapi.Client
+	bcchapiClient bcchapi.Client
 }
 
 func main() {
 	cfg := &config{
-		bccapiClient: bcchapi.NewClient(time.Minute),
+		bcchapiClient: bcchapi.NewClient(time.Minute),
 	}
 	CLI(cfg)
 }

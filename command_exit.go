@@ -1,5 +1,5 @@
 package main
 
-func commandExit() error {
+func commandExit(cfg *config) error {
 	return errExit
 }

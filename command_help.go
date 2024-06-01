@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func commandHelp() error {
+func commandHelp(cfg *config) error {
 	fmt.Println("This is the help menu for the Chile Economic Indexes CLI tool")
 	fmt.Println("All available commands are listed below:")
 
