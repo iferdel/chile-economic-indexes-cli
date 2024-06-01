@@ -12,14 +12,14 @@ jobs:
       GOPROXY: "https://proxy.golang.org,direct"
     
     steps: 
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: "1.22"
         id: go
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v4
 
       - name: install staticcheck
         run: |
