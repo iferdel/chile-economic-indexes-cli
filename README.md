@@ -1,4 +1,4 @@
-![ci test badge](https://github.com/iferdel/chile-economic-indexes-cli/actions/workflows/tests.yml/badge.svg?branch=main)
+![ci test badge](https://github.com/iferdel/chile-economic-indexes-cli/actions/workflows/tests.yml/badge.svg?event=pull_request)
 
 One major reference in terms of structure and the alike is the [Docker CLI GitHub repository](https://github.com/docker/cli)
 
