@@ -8,6 +8,3 @@ vet:
 
 staticcheck:
 	staticcheck ./...
-
-gosec:
-	gosec ./...
