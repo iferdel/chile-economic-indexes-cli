@@ -1,4 +1,4 @@
-all: test vet staticcheck
+all: test vet staticcheck gosec
 
 test:
 	go test -v ./...
