@@ -10,7 +10,7 @@ import (
 
 var errExit = errors.New("exit from cli tool requested")
 
-func CLI() {
+func CLI(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("bcch >")
