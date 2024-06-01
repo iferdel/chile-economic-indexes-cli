@@ -31,7 +31,13 @@ func CLI(cfg *config) {
 			fmt.Println("Command not available, see 'help'")
 			continue
 		}
-		err := command.callback(cfg)
+
+		args := []string{}
+		if len(cleanedInput) > 1 {
+			args = cleanedInput[1:]
+		}
+
+		err := command.callback(cfg, args...)
 		if err != nil {
 			if err == errExit {
 				break
@@ -50,7 +56,7 @@ func cleanInput(input string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -65,9 +71,14 @@ func getCommands() map[string]cliCommand {
 			description: "exits the cli tool",
 			callback:    commandExit,
 		},
+		"login": {
+			name:        "login",
+			description: "set credentials to requests to the BCCH",
+			callback:    commandLogin,
+		},
 		"search": {
 			name:        "search",
-			description: "it shows the available series to fetch",
+			description: "it shows the available series to fetch based on a frequency: DAILY, MONTHLY, QUARTERLY o ANNUAL",
 			callback:    commandSearchSeries,
 		},
 	}
