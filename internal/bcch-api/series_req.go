@@ -8,8 +8,8 @@ import (
 func (c *Client) GetAvailableSeries() (AvailableSeriesResp, error) {
 
 	endpoint := fmt.Sprintf("SieteRestWS.ashx?user=%s&pass=%s&function=SearchSeries&frequency=QUATERLY",
-		c.user,
-		c.password,
+		"",
+		"",
 	)
 	fullURL := baseURL + endpoint
 

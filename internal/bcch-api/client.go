@@ -6,9 +6,8 @@ import (
 )
 
 type Client struct {
-	httpClient http.Client
-	user       string
-	password   string
+	httpClient  http.Client
+	AuthConfigs map[string]AuthConfig
 }
 
 func NewClient(timeout time.Duration) Client {
@@ -16,7 +15,6 @@ func NewClient(timeout time.Duration) Client {
 		httpClient: http.Client{
 			Timeout: timeout,
 		},
-		user:     "",
-		password: "",
+		AuthConfigs: make(map[string]AuthConfig),
 	}
 }
