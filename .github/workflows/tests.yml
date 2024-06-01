@@ -15,8 +15,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.20"
+          go-version: "1.22"
+
+      - name: get Go version
+        run: go version
+
         id: go
+          
+      - name: get Go version
+        run: go version
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
@@ -27,7 +34,7 @@ jobs:
 
       - name: Install gosec
         run: |
-          cd /tmp && go install github.com/securego/gosec/v2/cmd/gosec@latest
+          cd /tmp && go install github.com/securego/gosec/v2.20.0/cmd/gosec@latest
 
       - name: Make tests
         run: |
