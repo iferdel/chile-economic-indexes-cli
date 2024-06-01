@@ -1,3 +1,5 @@
+![ci test badge](https://github.com/iferdel/chile-economic-indexes-cli/actions/workflows/tests.yml/badge.svg?branch=main)
+
 One major reference in terms of structure and the alike is the [Docker CLI GitHub repository](https://github.com/docker/cli)
 
 The first release version will rely entirely on the Go standard library. Subsequent versions will incrementally incorporate external libraries.
