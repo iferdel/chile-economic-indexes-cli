@@ -27,7 +27,7 @@ jobs:
 
       - name: Install gosec
         run: |
-          cd /tmp && go install github.com/securego/gosec/v2/cmd/gosec@2.20.0
+          cd /tmp && go install github.com/securego/gosec/v2/cmd/gosec@v2.20.0
 
       - name: Make tests
         run: |
