@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func commandLogin(cfg *config, args ...string) error {
@@ -21,7 +22,7 @@ func commandLogin(cfg *config, args ...string) error {
 }
 
 func loadLocalCredentials(cfg *config, filename string) error {
-	dat, err := os.ReadFile(filename)
+	dat, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
 		return err
 	}
@@ -38,7 +39,7 @@ func saveLocalCredentials(cfg *config, filename string) error {
 	if err != nil {
 		return err
 	}
-	if f, err := os.Create(filename); err == nil {
+	if f, err := os.Create(filepath.Clean(filename)); err == nil {
 		defer f.Close()
 		_, err := f.Write(data)
 		if err != nil {
