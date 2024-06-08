@@ -2,12 +2,25 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 )
 
 func commandLogin(cfg *config, args ...string) error {
+
+    flagset := flag.NewFlagSet("login", flag.ContinueOnError)
+    userPtr := flagset.String("u", "", "login user value")
+    passwordPtr := flagset.String("p", "", "login password value")
+    
+    err := flagset.Parse(args) // flag.Parse uses os.Args. In this case args are comming as input
+    if err != nil {
+        return fmt.Errorf("flags not entered")
+    }
+    fmt.Println("user: ", *userPtr)
+    fmt.Println("password: ", *passwordPtr)
+    fmt.Println("args used:", args)
 
 	defer saveLocalCredentials(cfg, bcchCredentials)
 	if len(args) != 2 {
