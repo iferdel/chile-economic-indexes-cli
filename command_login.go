@@ -14,7 +14,7 @@ func commandLogin(cfg *config, args ...string) error {
     userPtr := flagset.String("u", "", "login user value")
     passwordPtr := flagset.String("p", "", "login password value")
     
-    err := flagset.Parse(args) // flag.Parse uses os.Args. In this case args are comming as input
+    err := flagset.Parse(args) // Parse method uses a flag type
     if err != nil {
         return fmt.Errorf("flags not entered")
     }
