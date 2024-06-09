@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 )
 
+// Not entirely login since it only saves credentials to call the api for BCCH with them.
+// BCCH does not have any login feature, but the url for api requests uses the credentials.
 func commandLogin(cfg *config, args ...string) error {
 
 	flagset := flag.NewFlagSet("login", flag.ContinueOnError)
@@ -17,31 +19,31 @@ func commandLogin(cfg *config, args ...string) error {
 
 	err := flagset.Parse(args) // Parse method uses a flag type
 	if err != nil {
-		return fmt.Errorf("flags not entered")
+		return err
 	}
 	fmt.Println("user: ", *userPtr)
 	fmt.Println("password: ", *passwordPtr)
 	fmt.Println("args used:", args)
 
 	defer saveLocalCredentials(cfg, bcchCredentials)
-	if len(args) != 2 {
-		return fmt.Errorf("usage: login <user> <password>")
+	if *userPtr == "" && *passwordPtr == "" {
+		return fmt.Errorf("usage: login -u <user> -p <password>")
 	}
 
-	cfg.bcchapiClient.AuthConfig.User = args[0]
-	cfg.bcchapiClient.AuthConfig.Password = args[1]
+	cfg.bcchapiClient.AuthConfig.User = *userPtr
+	cfg.bcchapiClient.AuthConfig.Password = *passwordPtr
+
+	fmt.Println("saved credentials!")
 
 	return nil
-
 }
-
-var errNoCredentials = errors.New("No credentials yet saved, on every login the credentials are updated.")
 
 func loadLocalCredentials(cfg *config, filename string) error {
 	dat, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
-		return errNoCredentials
+		return errors.New("No credentials yet saved, login saves credentials for future sessions.")
 	}
+
 	err = json.Unmarshal(dat, &cfg.bcchapiClient.AuthConfig)
 	if err != nil {
 		return err

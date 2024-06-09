@@ -17,6 +17,8 @@ func commandHelp(cfg *config, args ...string) error {
 		fmt.Printf(" - %s: %s\n", command.name, command.description)
 	}
 	fmt.Println("")
+	fmt.Println("Use --help flag after every command to get more information")
+	fmt.Println("")
 
 	return nil
 }
