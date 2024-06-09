@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -10,17 +11,17 @@ import (
 
 func commandLogin(cfg *config, args ...string) error {
 
-    flagset := flag.NewFlagSet("login", flag.ContinueOnError)
-    userPtr := flagset.String("u", "", "login user value")
-    passwordPtr := flagset.String("p", "", "login password value")
-    
-    err := flagset.Parse(args) // Parse method uses a flag type
-    if err != nil {
-        return fmt.Errorf("flags not entered")
-    }
-    fmt.Println("user: ", *userPtr)
-    fmt.Println("password: ", *passwordPtr)
-    fmt.Println("args used:", args)
+	flagset := flag.NewFlagSet("login", flag.ContinueOnError)
+	userPtr := flagset.String("u", "", "login user value")
+	passwordPtr := flagset.String("p", "", "login password value")
+
+	err := flagset.Parse(args) // Parse method uses a flag type
+	if err != nil {
+		return fmt.Errorf("flags not entered")
+	}
+	fmt.Println("user: ", *userPtr)
+	fmt.Println("password: ", *passwordPtr)
+	fmt.Println("args used:", args)
 
 	defer saveLocalCredentials(cfg, bcchCredentials)
 	if len(args) != 2 {
@@ -34,10 +35,12 @@ func commandLogin(cfg *config, args ...string) error {
 
 }
 
+var errNoCredentials = errors.New("No credentials yet saved, on every login the credentials are updated.")
+
 func loadLocalCredentials(cfg *config, filename string) error {
 	dat, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
-		return err
+		return errNoCredentials
 	}
 	err = json.Unmarshal(dat, &cfg.bcchapiClient.AuthConfig)
 	if err != nil {
