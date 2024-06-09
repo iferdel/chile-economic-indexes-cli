@@ -21,9 +21,6 @@ func commandLogin(cfg *config, args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("user: ", &userPtr)
-	fmt.Println("password: ", &passwordPtr)
-	fmt.Println("args used:", args)
 
 	defer saveLocalCredentials(cfg, bcchCredentials)
 	if *userPtr == "" && *passwordPtr == "" {
