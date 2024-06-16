@@ -18,7 +18,6 @@ func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp
 
 	if cachedValues, ok := c.cache.Get(fullURL); ok {
 		//cache hit
-		fmt.Println("==== cache hit ====")
 		AvailableSeries := AvailableSeriesResp{}
 		err := json.Unmarshal(cachedValues, &AvailableSeries)
 		if err != nil {
