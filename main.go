@@ -5,7 +5,8 @@ import (
 )
 
 type config struct {
-	bcchapiClient bcchapi.Client
+	bcchapiClient       bcchapi.Client
+	lastAvailableSeries bcchapi.AvailableSeriesResp
 }
 
 func main() {

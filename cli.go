@@ -23,6 +23,8 @@ func CLI(cfg *config) {
 		fmt.Printf("Connected as %q\n", user)
 	}
 
+	loadSearch(cfg, searchHistoryFile)
+
 	for {
 		fmt.Print("bcch >")
 
