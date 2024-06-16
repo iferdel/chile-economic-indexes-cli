@@ -1,12 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func commandSearchSeries(cfg *config, args ...string) error {
 
 	creds := cfg.bcchapiClient.AuthConfig
 	if creds.User == "" || creds.Password == "" {
-		return fmt.Errorf("you need to login to use this command, see 'help' for details")
+		return fmt.Errorf("you need to first set your BCCH credentials to use this command, see 'help' for details")
 	}
 
 	if len(args) == 0 {
@@ -15,6 +17,10 @@ func commandSearchSeries(cfg *config, args ...string) error {
 	availableSeries, err := cfg.bcchapiClient.GetAvailableSeries(args[0])
 	if err != nil {
 		return err
+	}
+
+	if availableSeries.Codigo != 0 {
+		return fmt.Errorf(availableSeries.Descripcion)
 	}
 
 	for _, serie := range availableSeries.SeriesInfos {
