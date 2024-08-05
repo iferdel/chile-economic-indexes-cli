@@ -2,6 +2,7 @@ package spinner
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -55,23 +56,32 @@ func (s *Spinner) Start() {
 
 	ticker := time.NewTicker(s.frameRate)
 
-	go func() {
+	go func() error {
 		defer ticker.Stop()
 		for {
 			for _, frame := range s.frames {
 				b := byte(frame)
-				s.writer.Write([]byte{b})
+                _, err := s.writer.Write([]byte{b})
+                if err != nil {
+                    return fmt.Errorf("spinner error in write section: %w", err)
+                }
 
 				select {
 				case <-ctx.Done():
-					s.writer.Write([]byte("\b"))
+                    _, err := s.writer.Write([]byte("\b"))
+                    if err != nil {
+                        return fmt.Errorf("spinner error in Done/Close section: %w", err)
+                    }
 					close(done)
-					return
+					return nil
 				case <-ticker.C:
                     // placeholder for writer to be used.
 				}
 
-				s.writer.Write([]byte("\b"))
+                _, err = s.writer.Write([]byte("\b"))
+                if err != nil {
+                    return fmt.Errorf("spinner error in each tick: %w", err)
+                }
 			}
 		}
 	}()
