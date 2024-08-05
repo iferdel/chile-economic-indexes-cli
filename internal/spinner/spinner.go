@@ -68,8 +68,7 @@ func (s *Spinner) Start() {
 					close(done)
 					return
 				case <-ticker.C:
-                    //nolint:staticcheck // SA4011
-					break
+                    // placeholder for writer to be used.
 				}
 
 				s.writer.Write([]byte("\b"))
