@@ -37,7 +37,7 @@ func commandSetCredentials(cfg *config, args ...string) error {
 func loadLocalCredentials(cfg *config, filename string) error {
 	dat, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
-		return errors.New("No credentials yet saved, 'set-credentials' saves credentials for future sessions.")
+		return errors.New("no credentials yet saved, 'set-credentials' saves credentials for future sessions")
 	}
 
 	err = json.Unmarshal(dat, &cfg.bcchapiClient.AuthConfig)
