@@ -68,7 +68,7 @@ func (s *Spinner) Start() {
 					close(done)
 					return
 				case <-ticker.C:
-                    //lint:ignore SA4011
+                    //nolint:staticcheck // SA4011
 					break
 				}
 
