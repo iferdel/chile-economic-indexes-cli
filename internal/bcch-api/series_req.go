@@ -16,6 +16,16 @@ func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp
 	)
 	fullURL := baseURL + endpoint
 
+	if cachedValues, ok := c.cache.Get(fullURL); ok {
+		//cache hit
+		AvailableSeries := AvailableSeriesResp{}
+		err := json.Unmarshal(cachedValues, &AvailableSeries)
+		if err != nil {
+			return AvailableSeries, fmt.Errorf("on cache hit: error during unmarshal of body (JSON): %v", err)
+		}
+		return AvailableSeries, nil
+	}
+
 	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
 		return AvailableSeriesResp{}, fmt.Errorf("error making get request: %v", err)

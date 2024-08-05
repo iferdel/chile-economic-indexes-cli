@@ -1,5 +1,9 @@
 package main
 
+import "time"
+
 const (
-	bcchCredentials = ".bcch_credentials" // #nosec G101
+	clientTimeout     = time.Minute
+	bcchCredentials   = ".bcch_credentials" // #nosec G101
+	bcchCacheInterval = 24 * time.Hour
 )
