@@ -61,27 +61,27 @@ func (s *Spinner) Start() {
 		for {
 			for _, frame := range s.frames {
 				b := byte(frame)
-                _, err := s.writer.Write([]byte{b})
-                if err != nil {
-                    return fmt.Errorf("spinner error in write section: %w", err)
-                }
+				_, err := s.writer.Write([]byte{b})
+				if err != nil {
+					return fmt.Errorf("spinner error in write section: %w", err)
+				}
 
 				select {
 				case <-ctx.Done():
-                    _, err := s.writer.Write([]byte("\b"))
-                    if err != nil {
-                        return fmt.Errorf("spinner error in Done/Close section: %w", err)
-                    }
+					_, err := s.writer.Write([]byte("\b"))
+					if err != nil {
+						return fmt.Errorf("spinner error in Done/Close section: %w", err)
+					}
 					close(done)
 					return nil
 				case <-ticker.C:
-                    // placeholder for writer to be used.
+					// placeholder for writer to be used.
 				}
 
-                _, err = s.writer.Write([]byte("\b"))
-                if err != nil {
-                    return fmt.Errorf("spinner error in each tick: %w", err)
-                }
+				_, err = s.writer.Write([]byte("\b"))
+				if err != nil {
+					return fmt.Errorf("spinner error in each tick: %w", err)
+				}
 			}
 		}
 	}()
