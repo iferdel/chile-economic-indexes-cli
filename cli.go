@@ -96,6 +96,11 @@ func (cfg *config) getCommands() map[string]cliCommand {
             -rg flag allows to use ripgrep to control the filtering (you may need to install rg on your computer)`,
 			callback: withSpinnerWrapper(cfg.spinner, commandSearchSeries),
 		},
+		"get": {
+			name:        "get",
+			description: "get dated values from specific series",
+			callback:    withSpinnerWrapper(cfg.spinner, commandGetSeriesData),
+		},
 	}
 }
 

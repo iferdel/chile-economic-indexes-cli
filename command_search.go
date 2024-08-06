@@ -36,6 +36,9 @@ func commandSearchSeries(cfg *config, args ...string) error {
 		return err
 	}
 
+	// placeholder for spinner last symbol
+	fmt.Println("")
+
 	if *keywordPtr != "" {
 		for _, serie := range availableSeries.SeriesInfos {
 			if strings.Contains(serie.SpanishTitle, *keywordPtr) {
