@@ -53,3 +53,48 @@ func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp
 
 	return AvailableSeries, nil
 }
+
+func (c *Client) GetSeriesData(seriesId string) (SeriesDataResp, error) {
+	endpoint := fmt.Sprintf("SieteRestWS.ashx?user=%s&pass=%s&function=GetSeries&timeseries=%s",
+		c.AuthConfig.User,
+		c.AuthConfig.Password,
+		seriesId,
+	)
+	fullURL := baseURL + endpoint
+
+	if cachedValues, ok := c.cache.Get(fullURL); ok {
+		//cache hit
+		SeriesDataResp := SeriesDataResp{}
+		err := json.Unmarshal(cachedValues, &SeriesDataResp)
+		if err != nil {
+			return SeriesDataResp, fmt.Errorf("on cache hit: error during unmarshal of body (JSON): %v", err)
+		}
+		return SeriesDataResp, nil
+	}
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		return SeriesDataResp{}, fmt.Errorf("error making get request: %v", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return SeriesDataResp{}, fmt.Errorf("error during 'Do' of request: %v", err)
+	}
+	if resp.StatusCode > 399 {
+		return SeriesDataResp{}, fmt.Errorf("status code over 399: %v", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return SeriesDataResp{}, fmt.Errorf("error during reading of response body: %v", err)
+	}
+
+	SeriesDataResp := SeriesDataResp{}
+	err = json.Unmarshal(body, &SeriesDataResp)
+	if err != nil {
+		return SeriesDataResp, fmt.Errorf("error during unmarshal of body (JSON): %v", err)
+	}
+
+	return SeriesDataResp, nil
+}

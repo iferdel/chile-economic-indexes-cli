@@ -20,3 +20,19 @@ type AvailableSeriesResp struct {
 		CreatedAt        string `json:"createdAt"`
 	} `json:"SeriesInfos"`
 }
+
+type SeriesDataResp struct {
+	Codigo      int    `json:"Codigo"`
+	Descripcion string `json:"Descripcion"`
+	Series      struct {
+		DescripEsp string `json:"descripEsp"`
+		DescripIng string `json:"descripIng"`
+		SeriesID   string `json:"seriesId"`
+		Obs        []struct {
+			IndexDateString string `json:"indexDateString"`
+			Value           string `json:"value"`
+			StatusCode      string `json:"statusCode"`
+		} `json:"Obs"`
+	} `json:"Series"`
+	SeriesInfos []any `json:"SeriesInfos"`
+}
