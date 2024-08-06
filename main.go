@@ -3,9 +3,11 @@ package main
 import (
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
 	"github.com/iferdel/chile-economic-indexes-cli/internal/spinner"
+	"github.com/peterh/liner"
 )
 
 type config struct {
+	CLILiner      *liner.State
 	bcchapiClient bcchapi.Client
 	spinner       *spinner.Spinner
 }
