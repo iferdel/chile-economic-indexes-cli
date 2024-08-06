@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"os/exec"
 	"strings"
 )
 
@@ -27,15 +29,31 @@ func commandSearchSeries(cfg *config, args ...string) error {
 	}
 
 	flagset := flag.NewFlagSet("search-keyword", flag.ContinueOnError)
-	keywordPtr := flagset.String("w", "", "keyword for titles matching")
+	keywordPtr := flagset.String("keyword", "", "keyword for filtering")
+	grepPtr := flagset.Bool("rg", false, "if ripgrep used instead of regular contains")
 	err = flagset.Parse(args[1:])
 	if err != nil {
 		return err
 	}
+
 	if *keywordPtr != "" {
 		for _, serie := range availableSeries.SeriesInfos {
 			if strings.Contains(serie.SpanishTitle, *keywordPtr) {
-				fmt.Printf("- %v\n", serie.SpanishTitle)
+				if !*grepPtr {
+					fmt.Printf("- %v\n", serie.SpanishTitle)
+				} else {
+					cmd := exec.Command("rg", "-o", *keywordPtr)
+					cmd.Stdin = strings.NewReader(serie.SpanishTitle)
+					var out strings.Builder
+					cmd.Stdout = &out
+					err := cmd.Run()
+					if err != nil {
+						log.Fatal(err)
+					}
+					if out.String() != "" {
+						fmt.Printf("- %v\n", serie.SpanishTitle)
+					}
+				}
 			}
 		}
 		return nil

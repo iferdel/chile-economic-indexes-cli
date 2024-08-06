@@ -90,9 +90,11 @@ func (cfg *config) getCommands() map[string]cliCommand {
 			callback:    commandSetCredentials,
 		},
 		"search": {
-			name:        "search",
-			description: "it shows the available series to fetch based on a frequency: DAILY, MONTHLY, QUARTERLY o ANNUAL",
-			callback:    withSpinnerWrapper(cfg.spinner, commandSearchSeries),
+			name: "search",
+			description: `it shows the available series to fetch based on a frequency: DAILY, MONTHLY, QUARTERLY o ANNUAL. 
+            -keyword flag helps to filter over the series, you just need to add the work to be looked at in the series 
+            -rg flag allows to use ripgrep to control the filtering (you may need to install rg on your computer)`,
+			callback: withSpinnerWrapper(cfg.spinner, commandSearchSeries),
 		},
 	}
 }
