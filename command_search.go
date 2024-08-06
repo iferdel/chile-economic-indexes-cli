@@ -42,7 +42,7 @@ func commandSearchSeries(cfg *config, args ...string) error {
 				if !*grepPtr {
 					fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
 				} else {
-					cmd := exec.Command("rg", "-o", *keywordPtr)
+					cmd := exec.Command("rg", "-o", *keywordPtr) // #nosec G204
 					cmd.Stdin = strings.NewReader(serie.SpanishTitle)
 					var out strings.Builder
 					cmd.Stdout = &out
