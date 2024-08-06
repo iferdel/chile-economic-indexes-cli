@@ -40,7 +40,7 @@ func commandSearchSeries(cfg *config, args ...string) error {
 		for _, serie := range availableSeries.SeriesInfos {
 			if strings.Contains(serie.SpanishTitle, *keywordPtr) {
 				if !*grepPtr {
-					fmt.Printf("- %v\n", serie.SpanishTitle)
+					fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
 				} else {
 					cmd := exec.Command("rg", "-o", *keywordPtr)
 					cmd.Stdin = strings.NewReader(serie.SpanishTitle)
@@ -51,7 +51,7 @@ func commandSearchSeries(cfg *config, args ...string) error {
 						log.Fatal(err)
 					}
 					if out.String() != "" {
-						fmt.Printf("- %v\n", serie.SpanishTitle)
+						fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
 					}
 				}
 			}
@@ -60,7 +60,7 @@ func commandSearchSeries(cfg *config, args ...string) error {
 	}
 
 	for _, serie := range availableSeries.SeriesInfos {
-		fmt.Printf("- %v\n", serie.SpanishTitle)
+		fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
 	}
 
 	return nil
