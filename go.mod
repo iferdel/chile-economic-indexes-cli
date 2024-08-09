@@ -1,4 +1,4 @@
-module github.com/iferdel/chile-economic-indexes-cli
+module github.com/iferdel/chile-economic-indexes-cli/bcch
 
 go 1.22.2
 
