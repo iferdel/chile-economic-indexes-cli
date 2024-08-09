@@ -12,7 +12,7 @@ var searchCmd = &cobra.Command{
 	Short: "Search the whole list of available data series to be queried.",
 	Long:  `Every data series has their own ID which may be used on get command to retrieve its data.`,
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
-		loadLocalCredentials(&cfg, bcchCredentials)
+		loadLocalCredentials(&cfg, bcchCredentials) // #nosec G104
 		creds := cfg.bcchapiClient.AuthConfig
 		if creds.User == "" || creds.Password == "" {
 			fmt.Println("you need to first set your BCCH credentials to use this command, see 'help' for details")

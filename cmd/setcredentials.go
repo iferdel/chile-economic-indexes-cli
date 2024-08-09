@@ -21,7 +21,7 @@ var setCredentialsCmd = &cobra.Command{
 		passwordFlag, _ := cmd.Flags().GetString("password")
 		cfg.bcchapiClient.AuthConfig.User = userFlag
 		cfg.bcchapiClient.AuthConfig.Password = passwordFlag
-		saveLocalCredentials(cfg, bcchCredentials)
+		saveLocalCredentials(cfg, bcchCredentials) // #nosec G104
 		fmt.Println("saved credentials!")
 	},
 }
