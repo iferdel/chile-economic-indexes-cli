@@ -7,6 +7,8 @@ This CLI tool allows you to set credentials and search for available data series
 
 More information about the API can be found at [BCCh API para Base de Datos Estadísticos](https://si3.bcentral.cl/Siete/es/Siete/API?respuesta=)
 
+![VHS based gif](https://vhs.charm.sh/vhs-4IK7xg53ifluMIMVRdtgRy.gif)
+
 ## Version Roadmap
 The first release will rely entirely on the Go standard library. Subsequent versions will incrementally incorporate external libraries.
 Here's the roadmap of tools planned to be used:
@@ -16,5 +18,4 @@ Here's the roadmap of tools planned to be used:
 - [VHS](https://github.com/charmbracelet/vhs) for documentation
 
 ## Additional Comments
-One major reference in terms of structure and the alike is the [Docker CLI GitHub repository](https://github.com/docker/cli)
-CI is managed using GitHub Actions. Releases are handled by [GoReleaser](https://github.com/goreleaser/goreleaser) via [GitHub Actions](https://goreleaser.com/ci/actions/)
+One major reference in terms of structure and the alike is the [Docker CLI GitHub repository](https://github.com/docker/cli). CI is managed using GitHub Actions. Releases are handled by [GoReleaser](https://github.com/goreleaser/goreleaser) via [GitHub Actions](https://goreleaser.com/ci/actions/)

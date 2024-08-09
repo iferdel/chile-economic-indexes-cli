@@ -3,8 +3,8 @@ package cmd
 import (
 	"time"
 
-	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
-	"github.com/iferdel/chile-economic-indexes-cli/internal/spinner"
+	bcchapi "github.com/iferdel/chile-economic-indexes-cli/bcch/internal/bcch-api"
+	"github.com/iferdel/chile-economic-indexes-cli/bcch/internal/spinner"
 	"github.com/spf13/cobra"
 )
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/iferdel/chile-economic-indexes-cli/cmd"
+	"github.com/iferdel/chile-economic-indexes-cli/bcch/cmd"
 )
 
 func main() {
