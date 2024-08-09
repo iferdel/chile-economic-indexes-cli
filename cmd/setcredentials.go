@@ -1,37 +1,36 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 // BCCH does not have any login feature, but the url for api requests uses the credentials.
-func commandSetCredentials(cfg *config, args ...string) error {
+var setCredentialsCmd = &cobra.Command{
+	Use:   "setCredentials",
+	Short: "set credentials to be used to retrieve data from BCCh API",
+	Long: `It saves the credentials in a local file.
+    The local file is generated in the same folder where the cmd is used`,
+	Run: func(cmd *cobra.Command, args []string) {
+		userFlag, _ := cmd.Flags().GetString("user")
+		passwordFlag, _ := cmd.Flags().GetString("password")
+		cfg.bcchapiClient.AuthConfig.User = userFlag
+		cfg.bcchapiClient.AuthConfig.Password = passwordFlag
+		saveLocalCredentials(cfg, bcchCredentials)
+		fmt.Println("saved credentials!")
+	},
+}
 
-	flagset := flag.NewFlagSet("set-credentials", flag.ContinueOnError)
-	userPtr := flagset.String("u", "", "user")
-	passwordPtr := flagset.String("p", "", "password")
-
-	err := flagset.Parse(args) // Parse method uses a flag type
-	if err != nil {
-		return err
-	}
-
-	defer saveLocalCredentials(cfg, bcchCredentials)
-	if *userPtr == "" && *passwordPtr == "" {
-		return fmt.Errorf("usage: set-credentials -u <user> -p <password>")
-	}
-
-	cfg.bcchapiClient.AuthConfig.User = *userPtr
-	cfg.bcchapiClient.AuthConfig.Password = *passwordPtr
-
-	fmt.Println("saved credentials!")
-
-	return nil
+func init() {
+	rootCmd.AddCommand(setCredentialsCmd)
+	setCredentialsCmd.Flags().StringP("user", "u", "", "user for for bcch")
+	setCredentialsCmd.Flags().StringP("password", "p", "", "password for bcch")
+	setCredentialsCmd.MarkFlagsRequiredTogether("user", "password")
 }
 
 func loadLocalCredentials(cfg *config, filename string) error {
@@ -48,7 +47,7 @@ func loadLocalCredentials(cfg *config, filename string) error {
 
 }
 
-func saveLocalCredentials(cfg *config, filename string) error {
+func saveLocalCredentials(cfg config, filename string) error {
 	data, err := json.MarshalIndent(cfg.bcchapiClient.AuthConfig, "", "  ")
 	if err != nil {
 		return err

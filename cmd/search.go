@@ -1,70 +1,50 @@
-package main
+package cmd
 
 import (
-	"flag"
 	"fmt"
-	"log"
-	"os/exec"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-func commandSearchSeries(cfg *config, args ...string) error {
+var searchCmd = &cobra.Command{
+	Use:   "search",
+	Short: "Search the whole list of available data series to be queried.",
+	Long:  `Every data series has their own ID which may be used on get command to retrieve its data.`,
+	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
+		loadLocalCredentials(&cfg, bcchCredentials)
+		creds := cfg.bcchapiClient.AuthConfig
+		if creds.User == "" || creds.Password == "" {
+			fmt.Println("you need to first set your BCCH credentials to use this command, see 'help' for details")
+		}
 
-	creds := cfg.bcchapiClient.AuthConfig
-	if creds.User == "" || creds.Password == "" {
-		return fmt.Errorf("you need to first set your BCCH credentials to use this command, see 'help' for details")
-	}
+		frequencyFlag, _ := cmd.Flags().GetString("frequency")
+		keywordFlag, _ := cmd.Flags().GetString("keyword")
 
-	if len(args) == 0 {
-		return fmt.Errorf("usage: search <frequency>, see 'help for details'")
-	}
+		availableSeries, _ := cfg.bcchapiClient.GetAvailableSeries(frequencyFlag)
 
-	availableSeries, err := cfg.bcchapiClient.GetAvailableSeries(args[0])
-	if err != nil {
-		return err
-	}
+		if availableSeries.Codigo != 0 {
+			fmt.Println(availableSeries.Descripcion)
+		}
+		// placeholder for spinner last symbol
+		fmt.Println("")
 
-	if availableSeries.Codigo != 0 {
-		return fmt.Errorf(availableSeries.Descripcion)
-	}
-
-	flagset := flag.NewFlagSet("search-keyword", flag.ContinueOnError)
-	keywordPtr := flagset.String("keyword", "", "keyword for filtering")
-	grepPtr := flagset.Bool("rg", false, "if ripgrep used instead of regular contains")
-	err = flagset.Parse(args[1:])
-	if err != nil {
-		return err
-	}
-
-	// placeholder for spinner last symbol
-	fmt.Println("")
-
-	if *keywordPtr != "" {
-		for _, serie := range availableSeries.SeriesInfos {
-			if strings.Contains(serie.SpanishTitle, *keywordPtr) {
-				if !*grepPtr {
+		if keywordFlag != "" {
+			for _, serie := range availableSeries.SeriesInfos {
+				if strings.Contains(serie.SpanishTitle, keywordFlag) {
 					fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
-				} else {
-					cmd := exec.Command("rg", "-o", *keywordPtr) // #nosec G204
-					cmd.Stdin = strings.NewReader(serie.SpanishTitle)
-					var out strings.Builder
-					cmd.Stdout = &out
-					err := cmd.Run()
-					if err != nil {
-						log.Fatal(err)
-					}
-					if out.String() != "" {
-						fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
-					}
 				}
 			}
+		} else {
+			for _, serie := range availableSeries.SeriesInfos {
+				fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
+			}
 		}
-		return nil
-	}
+	}),
+}
 
-	for _, serie := range availableSeries.SeriesInfos {
-		fmt.Printf("- %v: %v\n", serie.SeriesID, serie.SpanishTitle)
-	}
-
-	return nil
+func init() {
+	rootCmd.AddCommand(searchCmd)
+	searchCmd.Flags().StringP("frequency", "f", "", "DAILY, MONTHLY, ANNUAL")
+	searchCmd.Flags().StringP("keyword", "k", "", "Keyword to be used to filter the list of series")
 }
