@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"os"
 	"time"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
@@ -32,16 +31,13 @@ It allows the use of keywords to filter the whole list of available data series.
 Every data series has their own ID which may be used on get command to retrieve its data.`,
 }
 
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+// Execute executes the root command.
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.AddCommand(searchCmd)
 }
 
 func initConfig() {
