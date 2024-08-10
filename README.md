@@ -10,12 +10,12 @@ More information about the API can be found at [BCCh API para Base de Datos Esta
 ![VHS based gif](https://vhs.charm.sh/vhs-4IK7xg53ifluMIMVRdtgRy.gif)
 
 ## Version Roadmap
-The first release will rely entirely on the Go standard library. Subsequent versions will incrementally incorporate external libraries.
+The first release (v1.x.x) will rely entirely on the Go standard library. Subsequent versions will incrementally incorporate external libraries.
 Here's the roadmap of tools planned to be used:
-- [Liner](https://github.com/peterh/liner) for command line editing with history.
-- [Cobra](https://github.com/spf13/cobra) for modern Go CLI applications.
-- [Bubble Tea](https://github.com/charmbracelet/bubbletea) for interactive CLI applications.
+- v2.x.x [Liner](https://github.com/peterh/liner) for command line editing with history.
+- v3.x.x [Cobra](https://github.com/spf13/cobra) for modern Go CLI applications.
+- v4.x.x [Bubble Tea](https://github.com/charmbracelet/bubbletea) for interactive CLI applications.
 - [VHS](https://github.com/charmbracelet/vhs) for documentation
 
 ## Additional Comments
-One major reference in terms of structure and the alike is the [Docker CLI GitHub repository](https://github.com/docker/cli). CI is managed using GitHub Actions. Releases are handled by [GoReleaser](https://github.com/goreleaser/goreleaser) via [GitHub Actions](https://goreleaser.com/ci/actions/)
+One major reference in terms of structure and the alike are the [Docker CLI GitHub repository](https://github.com/docker/cli) and [BootDev CLI GitHub repository](https://github.com/bootdotdev/bootdev). CI is managed using GitHub Actions. Releases are handled by [GoReleaser](https://github.com/goreleaser/goreleaser) via [GitHub Actions](https://goreleaser.com/ci/actions/)
