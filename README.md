@@ -132,4 +132,3 @@ Follow these steps to get started:
 5. **Submit a pull request**
 
    If you'd like to contribute, please fork the repository, make your changes, and open a pull request to the main branch.
-
