@@ -34,6 +34,69 @@ After unzipping, refer to the executable from your terminal and type commands to
 ```
 *Note: To simplify command usage, you can add the executable to your PATH. This allows you to use a shorter command, such as bcch, instead of specifying the full path each time.*
 
+# BCCh CLI Tool
+
+The **BCCh CLI Tool** provides an interface for interacting with the Banco Central de Chile API, allowing you to set credentials, search for available data series, and retrieve data using specific series IDs.
+
+## 🚀 Installation
+
+Provide installation instructions here, such as:
+
+```sh
+go install github.com/yourusername/bcch-cli
+```
+
+Or any other relevant way to install the tool.
+
+## 📚 Usage
+
+### Available Commands
+
+- **`help`**: Display help information for any command.
+- **`setCredentials`**: Save credentials for BCCh API access locally.
+- **`search`**: Search the full list of available data series, with options to filter by keywords and frequency.
+- **`get`**: Retrieve data from a specific data series by series ID.
+
+### Flags
+
+- `-h`, `--help` - Show help for any command.
+- `-k`, `--keyword` - Filter search results by keyword (used with the `search` command).
+- `-f`, `--frequency` - Filter search results by frequency (`DAILY`, `MONTHLY`, `ANNUAL`) (used with the `search` command).
+- `-s`, `--series` - Specify the series ID to retrieve data from (used with the `get` command).
+- `-u`, `--user` - User for BCCh API (used with the `setCredentials` command).
+- `-p`, `--password` - Password for BCCh API (used with the `setCredentials` command).
+
+## ⚡ Examples
+
+### Set up Credentials
+
+Save your credentials to be used for BCCh API access:
+
+```bash
+bcch setCredentials -u myUser -p myPassword
+```
+
+### Search for Data Series
+
+Search for monthly inflation data:
+
+```bash
+bcch search -k "inflation" -f MONTHLY
+```
+
+### Retrieve Data from a Specific Series
+
+Retrieve data using a series ID:
+
+```bash
+bcch get -s "12345-inflation-monthly"
+```
+
+## Out of the Box Features
+- **Caching for repeated requests:** Reduce API load and improve performance by caching repeated requests.
+- **Remember login across new sessions:** Automatically remember login credentials for easier access.
+- **Loading spinner to enhance user experience:** Provide visual feedback during data loading to improve user interaction.
+
 ## Additional Comments
 One major reference in terms of structure and the alike are the [Docker CLI GitHub repository](https://github.com/docker/cli) and [BootDev CLI GitHub repository](https://github.com/bootdotdev/bootdev). CI is managed using GitHub Actions. Releases are handled by [GoReleaser](https://github.com/goreleaser/goreleaser) via [GitHub Actions](https://goreleaser.com/ci/actions/)
 
