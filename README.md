@@ -100,3 +100,36 @@ bcch get -s "12345-inflation-monthly"
 ## Additional Comments
 One major reference in terms of structure and the alike are the [Docker CLI GitHub repository](https://github.com/docker/cli) and [BootDev CLI GitHub repository](https://github.com/bootdotdev/bootdev). CI is managed using GitHub Actions. Releases are handled by [GoReleaser](https://github.com/goreleaser/goreleaser) via [GitHub Actions](https://goreleaser.com/ci/actions/)
 
+## 🤝 Contributing
+
+Follow these steps to get started:
+
+1. **Clone the repository**
+
+   ```sh
+   git clone https://github.com/iferdel/chile-economic-indexes-cli@latest
+   cd chile-economic-indexes-cli
+   ```
+   
+2. **Build the project**
+
+   ```sh
+   go build
+   ```
+
+3. **Run the project**
+
+   ```sh
+   ./chile-economic-indexes-cli
+   ```
+
+4. **Run the tests**
+
+   ```sh
+   go test ./...
+   ```
+
+5. **Submit a pull request**
+
+   If you'd like to contribute, please fork the repository, make your changes, and open a pull request to the main branch.
+
