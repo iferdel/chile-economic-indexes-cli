@@ -48,9 +48,8 @@ var getCmd = &cobra.Command{
 
 		seriesData, _ := cfg.bcchapiClient.GetSeriesData(seriesFlag, firstDateFlag, lastDateFlag)
 
-		if seriesData.Codigo != 0 {
-			fmt.Println(seriesData.Descripcion)
-		}
+		fmt.Println(seriesData.Series.DescripEsp)
+
 		// placeholder for spinner last symbol
 		fmt.Println("")
 		for _, series := range seriesData.Series.Obs {
