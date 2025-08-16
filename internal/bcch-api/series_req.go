@@ -54,12 +54,21 @@ func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp
 	return AvailableSeries, nil
 }
 
-func (c *Client) GetSeriesData(seriesID string) (SeriesDataResp, error) {
+func (c *Client) GetSeriesData(seriesID, firstDate, lastDate string) (SeriesDataResp, error) {
 	endpoint := fmt.Sprintf("SieteRestWS.ashx?user=%s&pass=%s&function=GetSeries&timeseries=%s",
 		c.AuthConfig.User,
 		c.AuthConfig.Password,
 		seriesID,
 	)
+
+	if firstDate != "" && lastDate != "" {
+		endpoint += fmt.Sprintf("&firstdate=%s&lastdate=%s", firstDate, lastDate)
+	} else if firstDate != "" {
+		endpoint += fmt.Sprintf("&firstdate=%s", firstDate)
+	} else if lastDate != "" {
+		endpoint += fmt.Sprintf("&lastdate=%s", lastDate)
+	}
+
 	fullURL := baseURL + endpoint
 
 	if cachedValues, ok := c.cache.Get(fullURL); ok {
@@ -99,11 +108,11 @@ func (c *Client) GetSeriesData(seriesID string) (SeriesDataResp, error) {
 	return SeriesDataResp, nil
 }
 
-func (c *Client) GetMultipleSeriesData(seriesIDs []string) (map[string]SeriesDataResp, map[string]error) {
+func (c *Client) GetMultipleSeriesData(seriesIDs []string, firstDate, lastDate string) (map[string]SeriesDataResp, map[string]error) {
 	var seriesData = make(map[string]SeriesDataResp)
 	var fetchErrors = make(map[string]error)
 	for _, seriesID := range seriesIDs {
-		result, err := c.GetSeriesData(seriesID)
+		result, err := c.GetSeriesData(seriesID, firstDate, lastDate)
 		if err != nil {
 			fetchErrors[seriesID] = err
 			continue
