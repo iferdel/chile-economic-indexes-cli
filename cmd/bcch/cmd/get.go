@@ -20,7 +20,7 @@ var getCmd = &cobra.Command{
         bcch get --series UF --firstdate 2020-01-01 --lastdate 2021-01-01
 	`,
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
-		err := loadLocalCredentials(&cfg, bcchCredentials)
+		err := cfg.bcchapiClient.AuthConfig.Load(bcchCredentials) // #nosec G104
 		if err != nil {
 			fmt.Println(err)
 		}

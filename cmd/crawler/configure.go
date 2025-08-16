@@ -1,3 +1,4 @@
+// crawler/configure.go
 package main
 
 import (

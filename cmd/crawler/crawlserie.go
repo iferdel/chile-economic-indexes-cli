@@ -19,17 +19,13 @@ func (cfg *config) crawlSeries() {
 		}
 	}
 
-	for serie, data := range seriesData {
-		fmt.Printf("Data for series %s: %#v\n", serie, data)
-	}
-
-	if err := saveToJSON(seriesData, filename); err != nil {
+	if err := seriesToJSON(seriesData, filename); err != nil {
 		fmt.Printf("Failed to save JSON: %v\n", err)
 	}
 	return
 }
 
-func saveToJSON(payload map[string]bcchapi.SeriesDataResp, filename string) error {
+func seriesToJSON(payload map[string]bcchapi.SeriesDataResp, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
