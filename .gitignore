@@ -26,3 +26,9 @@ bcch.gif
 
 # Go workspace file
 go.work
+
+_bcch
+bcch.zsh
+bcch.bash
+bcch.fish
+bcch.ps1

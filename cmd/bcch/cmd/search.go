@@ -1,3 +1,4 @@
+// cmd/search.go
 package cmd
 
 import (
@@ -20,6 +21,19 @@ var searchCmd = &cobra.Command{
 
 		frequencyFlag, _ := cmd.Flags().GetString("frequency")
 		keywordFlag, _ := cmd.Flags().GetString("keyword")
+
+		validFrequencies := []string{"DAILY", "MONTHLY", "QUARTERLY", "ANNUAL"}
+		found := false
+		for _, freq := range validFrequencies {
+			if frequencyFlag == freq {
+				found = true
+				break
+			}
+		}
+		if !found {
+			fmt.Println("--frequency must be one of: DAILY, MONTHLY, QUARTERLY, ANNUAL.")
+			return
+		}
 
 		availableSeries, _ := cfg.bcchapiClient.GetAvailableSeries(frequencyFlag)
 
@@ -45,6 +59,6 @@ var searchCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(searchCmd)
-	searchCmd.Flags().StringP("frequency", "f", "", "DAILY, MONTHLY, ANNUAL")
+	searchCmd.Flags().StringP("frequency", "f", "", "Frequency of the data: DAILY, MONTHLY, QUARTERLY, or ANNUAL")
 	searchCmd.Flags().StringP("keyword", "k", "", "Keyword to be used to filter the list of series")
 }

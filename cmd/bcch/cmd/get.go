@@ -1,3 +1,4 @@
+// cmd/get.go
 package cmd
 
 import (
@@ -12,6 +13,12 @@ const dateLayout = "2006-01-02"
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Retrieve data from specific series ID",
+	Long: `
+    Retrieve time series data from BCCh.
+
+    Example:
+        bcch get --series UF --firstdate 2020-01-01 --lastdate 2021-01-01
+	`,
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
 		err := loadLocalCredentials(&cfg, bcchCredentials)
 		if err != nil {
