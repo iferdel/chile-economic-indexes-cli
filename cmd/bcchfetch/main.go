@@ -1,4 +1,3 @@
-// crawler/main.go
 package main
 
 import (
@@ -11,7 +10,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("not enough arguments provided")
-		fmt.Println("usage: bcchcrawler <maxConcurrency>")
+		fmt.Println("usage: bcchfetch <maxConcurrency>")
 		return
 	}
 
@@ -27,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error loading credentials: %q", err)
 	}
-	fmt.Println("starting crawl of BCCh API")
+	fmt.Println("starting fetch of BCCh API")
 	fmt.Println("===============================")
-	cfg.crawlSeries(maxConcurrency)
+	cfg.fetchSeries(maxConcurrency)
 }

@@ -10,7 +10,7 @@ import (
 
 const filename = "series.json"
 
-func (cfg *config) crawlSeries(MaxConcurrency int) {
+func (cfg *config) fetchSeries(MaxConcurrency int) {
 	seriesData, seriesErrors := cfg.client.GetMultipleSeriesData(cfg.series, "", "", &bcchapi.FetchOptions{MaxConcurrency: MaxConcurrency})
 	for _, err := range seriesErrors {
 		if err != nil {
