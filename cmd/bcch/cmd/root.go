@@ -42,7 +42,7 @@ func init() {
 }
 
 func initConfig() {
-	cfg.bcchapiClient = bcchapi.NewClient(clientTimeout, bcchCacheInterval)
+	cfg.bcchapiClient = *bcchapi.NewClient(clientTimeout, bcchCacheInterval)
 }
 
 func withSpinnerWrapper(s *spinner.Spinner, fn func(cmd *cobra.Command, args []string)) func(cmd *cobra.Command, args []string) {

@@ -13,8 +13,8 @@ type Client struct {
 	AuthConfig AuthConfig
 }
 
-func NewClient(timeout, cacheInterval time.Duration) Client {
-	return Client{
+func NewClient(timeout, cacheInterval time.Duration) *Client {
+	return &Client{
 		cache: bcchcache.NewCache(cacheInterval),
 		httpClient: http.Client{
 			Timeout: timeout,
