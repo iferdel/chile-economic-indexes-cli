@@ -6,11 +6,9 @@ import (
 	"log"
 )
 
-const bcchcreds = ".bcch_credentials"
-
 func main() {
 	cfg := configure()
-	err := cfg.client.AuthConfig.Load(bcchcreds)
+	err := cfg.client.AuthConfig.Load()
 	if err != nil {
 		log.Fatalf("error loading credentials: %q", err)
 	}

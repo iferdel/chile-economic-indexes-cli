@@ -7,14 +7,16 @@ import (
 	"path/filepath"
 )
 
+const bcchCredentials = ".bcch_credentials" // #nosec G101
+
 type AuthConfig struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 }
 
 // Loads credentials into the given AuthConfig struct
-func (a *AuthConfig) Load(filename string) error {
-	dat, err := os.ReadFile(filepath.Clean(filename))
+func (a *AuthConfig) Load() error {
+	dat, err := os.ReadFile(filepath.Clean(bcchCredentials))
 	if err != nil {
 		return errors.New("no credentials yet saved, use 'set-credentials' to save")
 	}
@@ -22,12 +24,12 @@ func (a *AuthConfig) Load(filename string) error {
 }
 
 // Saves authconfig back to disk
-func (a *AuthConfig) Save(filename string) error {
+func (a *AuthConfig) Save() error {
 	data, err := json.MarshalIndent(a, "", "  ")
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(filepath.Clean(filename))
+	f, err := os.Create(filepath.Clean(bcchCredentials))
 	if err != nil {
 		return err
 	}

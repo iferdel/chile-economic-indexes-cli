@@ -19,7 +19,7 @@ var setCredentialsCmd = &cobra.Command{
 		cfg.bcchapiClient.AuthConfig.User = userFlag
 		cfg.bcchapiClient.AuthConfig.Password = passwordFlag
 
-		err := cfg.bcchapiClient.AuthConfig.Save(bcchCredentials)
+		err := cfg.bcchapiClient.AuthConfig.Save()
 		if err != nil {
 			fmt.Printf("failed to save credentials: %v\n", err)
 			return
