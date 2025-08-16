@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 )
+
+type FetchOptions struct {
+	MaxConcurrency int
+}
 
 func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp, error) {
 
@@ -108,16 +113,35 @@ func (c *Client) GetSeriesData(seriesID, firstDate, lastDate string) (SeriesData
 	return SeriesDataResp, nil
 }
 
-func (c *Client) GetMultipleSeriesData(seriesIDs []string, firstDate, lastDate string) (map[string]SeriesDataResp, map[string]error) {
+func (c *Client) GetMultipleSeriesData(seriesIDs []string, firstDate, lastDate string, opts *FetchOptions) (map[string]SeriesDataResp, map[string]error) {
 	var seriesData = make(map[string]SeriesDataResp)
 	var fetchErrors = make(map[string]error)
-	for _, seriesID := range seriesIDs {
-		result, err := c.GetSeriesData(seriesID, firstDate, lastDate)
-		if err != nil {
-			fetchErrors[seriesID] = err
-			continue
-		}
-		seriesData[seriesID] = result
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	maxConc := 3
+	if opts != nil && opts.MaxConcurrency > 0 {
+		maxConc = opts.MaxConcurrency
 	}
+	sem := make(chan struct{}, maxConc)
+
+	for _, seriesID := range seriesIDs {
+		wg.Add(1)
+		go func(id string) {
+			defer wg.Done()
+			sem <- struct{}{}        // acquire slot
+			defer func() { <-sem }() // release slot
+
+			result, err := c.GetSeriesData(seriesID, firstDate, lastDate)
+			mu.Lock()
+			defer mu.Unlock()
+			if err != nil {
+				fetchErrors[seriesID] = err
+				return
+			}
+			seriesData[seriesID] = result
+		}(seriesID)
+	}
+	wg.Wait()
 	return seriesData, fetchErrors
 }
