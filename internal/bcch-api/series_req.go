@@ -54,11 +54,11 @@ func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp
 	return AvailableSeries, nil
 }
 
-func (c *Client) GetSeriesData(seriesId string) (SeriesDataResp, error) {
+func (c *Client) GetSeriesData(seriesID string) (SeriesDataResp, error) {
 	endpoint := fmt.Sprintf("SieteRestWS.ashx?user=%s&pass=%s&function=GetSeries&timeseries=%s",
 		c.AuthConfig.User,
 		c.AuthConfig.Password,
-		seriesId,
+		seriesID,
 	)
 	fullURL := baseURL + endpoint
 
@@ -97,4 +97,18 @@ func (c *Client) GetSeriesData(seriesId string) (SeriesDataResp, error) {
 	}
 
 	return SeriesDataResp, nil
+}
+
+func (c *Client) GetMultipleSeriesData(seriesIDs []string) (map[string]SeriesDataResp, map[string]error) {
+	var seriesData = make(map[string]SeriesDataResp)
+	var fetchErrors = make(map[string]error)
+	for _, seriesID := range seriesIDs {
+		result, err := c.GetSeriesData(seriesID)
+		if err != nil {
+			fetchErrors[seriesID] = err
+			continue
+		}
+		seriesData[seriesID] = result
+	}
+	return seriesData, fetchErrors
 }
