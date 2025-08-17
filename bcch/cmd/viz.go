@@ -4,12 +4,23 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )
+
+type Set struct {
+	Description string
+	Series      []string
+}
+
+type OutputSetData struct {
+	Description string      `json:"description"`
+	SeriesData  interface{} `json:"seriesData"` // The actual fetched series data (slice of bcchapi.SeriesData)
+}
 
 var vizCmd = &cobra.Command{
 	Use:   "viz",
@@ -34,32 +45,36 @@ take a look at 'search --predefined'
 			return
 		}
 
-		seriesSetFlag, _ := cmd.Flags().GetString("set")
+		setNameFlag, _ := cmd.Flags().GetString("set")
+		setName := strings.ToUpper(setNameFlag)
 
-		seriesSets := map[string][]string{
-			"employment": {
-				"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
-				"F074.IPC.VAR.Z.Z.C.M",
-				"F019.IPC.V12.10.M",
-				"F019.PPB.PRE.100.D",
-				"F073.TCO.PRE.Z.D",
-				"F049.DES.TAS.INE9.10.M",
-				"F049.DES.TAS.INE9.26.M",
-				"F049.DES.TAS.INE9.12.M",
+		availableSetsSeries := map[string]Set{
+			"EMPLOYMENT": {
+				Description: "shows the employment relation between different regions",
+				Series: []string{
+					"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
+					"F074.IPC.VAR.Z.Z.C.M",
+					"F019.IPC.V12.10.M",
+					"F019.PPB.PRE.100.D",
+					"F073.TCO.PRE.Z.D",
+					"F049.DES.TAS.INE9.10.M",
+					"F049.DES.TAS.INE9.26.M",
+					"F049.DES.TAS.INE9.12.M",
+				},
 			},
 		}
 
-		seriesKeys := make([]string, 0, len(seriesSets))
-		for k := range seriesSets {
-			seriesKeys = append(seriesKeys, k)
+		availableSets := make([]string, 0, len(availableSetsSeries))
+		for k := range availableSetsSeries {
+			availableSets = append(availableSets, k)
 		}
 
-		seriesSet, ok := seriesSets[seriesSetFlag]
+		set, ok := availableSetsSeries[setName]
 		if !ok {
-			log.Fatalf("serie %v not present in available series: %v", seriesSetFlag, seriesKeys)
+			log.Fatalf("serie %v not present in available series: %v", setName, availableSets)
 		}
 
-		cfg.fetchSeries(seriesSet, "./public/series.json", 3)
+		cfg.fetchSeries(setName, set, "./public/series.json", 3)
 
 		// can later use go for --detached mode
 		if err := StartVizServer("public", "49966"); err != nil {
@@ -74,13 +89,13 @@ func init() {
 	// then it can be extended with other 'sets'
 	// and also with flags such as 'detached mode'
 	rootCmd.AddCommand(vizCmd)
-	searchCmd.Flags().String("set", "", "Predefined set of data to viz predefined graphs")
+	vizCmd.Flags().String("set", "", "Predefined set of data to viz predefined graphs")
 }
 
 // if filename is empty "", it saves it into memory?? --> redis?
-func (cfg *config) fetchSeries(seriesSet []string, filename string, MaxConcurrency int) {
+func (cfg *config) fetchSeries(setName string, set Set, filename string, MaxConcurrency int) {
 	seriesSetData, seriesSetErrors := cfg.bcchapiClient.GetMultipleSeriesData(
-		seriesSet,
+		set.Series,
 		"",
 		"",
 		&bcchapi.FetchOptions{MaxConcurrency: MaxConcurrency},
@@ -92,11 +107,19 @@ func (cfg *config) fetchSeries(seriesSet []string, filename string, MaxConcurren
 		}
 	}
 
-	// add a 'label' to the first parent or root of the .json
-	// so we can now for sure what it is supposed to show this 'set of series'
-	// Modify seriesData to add a parent to the json struct
+	outputDataForSet := OutputSetData{
+		Description: set.Description,
+		SeriesData:  seriesSetData, // This will be marshaled as an array in JSON
+	}
 
-	if err := bcchapi.SaveSeriesToJSON(seriesSetData, filename); err != nil {
+	finalJSONOutput := map[string]OutputSetData{
+		setName: outputDataForSet,
+	}
+
+	if err := bcchapi.SaveSeriesToJSON(
+		finalJSONOutput,
+		filename,
+	); err != nil {
 		fmt.Printf("Failed to save JSON: %v\n", err)
 	}
 	return
