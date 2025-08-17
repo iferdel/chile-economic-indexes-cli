@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
 	"github.com/spf13/cobra"
@@ -16,14 +17,15 @@ var vizCmd = &cobra.Command{
 		This command opens an static environment where you can
 visualize trends of a variety of predefined sets of series
 that are fetched from the BCCh API.
-
-By default, the server runs on http://localhost:49966,
-but you can configure the port and other options with flags.
-
-To check which set of series are available in this version,
-take a look at 'search --predefined'
-	`,
-	Example: "bcch viz UN --detached",
+`,
+	// By default, the server runs on http://localhost:49966,
+	// but you can configure the port and other options with flags.
+	//
+	// To check which set of series are available in this version,
+	// take a look at 'search --predefined'
+	// 	`,
+	Example: "bcch viz",
+	//Example: "bcch viz UN --detached",
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
 		err := cfg.bcchapiClient.AuthConfig.Load()
 		if err != nil {
@@ -43,6 +45,11 @@ take a look at 'search --predefined'
 		}
 
 		cfg.fetchSeries(seriesIDs, "series.json", 3)
+
+		// can later use go for --detached mode
+		if err := StartVizServer("series.json"); err != nil {
+			log.Fatalf("viz server error: %v", err)
+		}
 	}),
 }
 
@@ -54,7 +61,7 @@ func init() {
 	rootCmd.AddCommand(vizCmd)
 }
 
-// if filename is empty "", it saves it into memory??
+// if filename is empty "", it saves it into memory?? --> redis?
 func (cfg *config) fetchSeries(series []string, filename string, MaxConcurrency int) {
 	seriesData, seriesErrors := cfg.bcchapiClient.GetMultipleSeriesData(series, "", "", &bcchapi.FetchOptions{MaxConcurrency: MaxConcurrency})
 	for _, err := range seriesErrors {
@@ -66,4 +73,10 @@ func (cfg *config) fetchSeries(series []string, filename string, MaxConcurrency 
 		fmt.Printf("Failed to save JSON: %v\n", err)
 	}
 	return
+}
+
+func StartVizServer(jsonpath string) error {
+	port := 49966
+	fmt.Println(port)
+	return nil
 }
