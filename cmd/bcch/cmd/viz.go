@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
+	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +49,7 @@ that are fetched from the BCCh API.
 		cfg.fetchSeries(seriesIDs, "./public/series.json", 3)
 
 		// can later use go for --detached mode
-		if err := StartVizServer("./public/series.json"); err != nil {
+		if err := StartVizServer("public", "49966"); err != nil {
 			log.Fatalf("viz server error: %v", err)
 		}
 	}),
@@ -75,8 +77,14 @@ func (cfg *config) fetchSeries(series []string, filename string, MaxConcurrency 
 	return
 }
 
-func StartVizServer(jsonpath string) error {
-	port := 49966
-	fmt.Println(port)
-	return nil
+func StartVizServer(publicDir, port string) error {
+	fs := http.FileServer(http.Dir(publicDir))
+
+	http.Handle("/", fs)
+
+	url := "http://localhost:" + port + "/"
+	go browser.OpenURL(url)
+
+	log.Printf("Serving series visualization at %s -- Ctrl+C to stop", url)
+	return http.ListenAndServe(":"+port, nil)
 }
