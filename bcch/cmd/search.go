@@ -1,4 +1,3 @@
-// cmd/search.go
 package cmd
 
 import (

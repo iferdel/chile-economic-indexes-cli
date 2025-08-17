@@ -1,4 +1,3 @@
-// cmd/completion.go
 package cmd
 
 import "github.com/spf13/cobra"

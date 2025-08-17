@@ -1,4 +1,3 @@
-// cmd/setcredentials.go
 package cmd
 
 import (
