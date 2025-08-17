@@ -44,10 +44,10 @@ that are fetched from the BCCh API.
 			"F049.DES.TAS.INE9.12.M",
 		}
 
-		cfg.fetchSeries(seriesIDs, "series.json", 3)
+		cfg.fetchSeries(seriesIDs, "./public/series.json", 3)
 
 		// can later use go for --detached mode
-		if err := StartVizServer("series.json"); err != nil {
+		if err := StartVizServer("./public/series.json"); err != nil {
 			log.Fatalf("viz server error: %v", err)
 		}
 	}),
