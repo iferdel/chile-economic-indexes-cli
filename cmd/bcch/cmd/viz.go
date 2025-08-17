@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
 	"github.com/pkg/browser"
@@ -83,7 +84,10 @@ func StartVizServer(publicDir, port string) error {
 	http.Handle("/", fs)
 
 	url := "http://localhost:" + port + "/"
-	go browser.OpenURL(url)
+	go func() {
+		time.Sleep(2 * time.Second)
+		browser.OpenURL(url)
+	}()
 
 	log.Printf("Serving series visualization at %s -- Ctrl+C to stop", url)
 	return http.ListenAndServe(":"+port, nil)
