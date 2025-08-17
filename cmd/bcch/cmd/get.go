@@ -1,4 +1,3 @@
-// cmd/get.go
 package cmd
 
 import (
@@ -22,7 +21,8 @@ var getCmd = &cobra.Command{
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
 		err := cfg.bcchapiClient.AuthConfig.Load()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("error loading credentials: %v\n", err)
+			return
 		}
 		creds := cfg.bcchapiClient.AuthConfig
 		if creds.User == "" || creds.Password == "" {
