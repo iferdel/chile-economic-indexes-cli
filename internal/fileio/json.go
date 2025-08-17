@@ -1,4 +1,4 @@
-package bcchapi
+package fileio
 
 import (
 	"encoding/json"

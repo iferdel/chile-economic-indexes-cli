@@ -8,6 +8,7 @@ import (
 	"time"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
+	"github.com/iferdel/chile-economic-indexes-cli/internal/fileio"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )
@@ -116,7 +117,7 @@ func (cfg *config) fetchSeries(setName string, set Set, filename string, MaxConc
 		setName: outputDataForSet,
 	}
 
-	if err := bcchapi.SaveSeriesToJSON(
+	if err := fileio.SaveSeriesToJSON(
 		finalJSONOutput,
 		filename,
 	); err != nil {
