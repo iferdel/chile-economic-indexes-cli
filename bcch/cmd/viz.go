@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"maps"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -65,14 +67,9 @@ take a look at 'search --predefined'
 			},
 		}
 
-		availableSets := make([]string, 0, len(availableSetsSeries))
-		for k := range availableSetsSeries {
-			availableSets = append(availableSets, k)
-		}
-
 		set, ok := availableSetsSeries[setName]
 		if !ok {
-			log.Fatalf("serie %v not present in available series: %v", setName, availableSets)
+			log.Fatalf("serie %q not present in available series: %v", setName, slices.Sorted(maps.Keys(availableSetsSeries)))
 		}
 
 		cfg.fetchSeries(setName, set, "./public/series.json", 3)
