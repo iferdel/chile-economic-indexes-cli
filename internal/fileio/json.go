@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func SaveSeriesToJSON(payload interface{}, filename string) error {
+func SaveSeriesToJSON(payload any, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

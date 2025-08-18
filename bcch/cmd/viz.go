@@ -17,12 +17,12 @@ import (
 
 type Set struct {
 	Description string
-	Series      []string
+	SeriesNames []string
 }
 
 type OutputSetData struct {
-	Description string      `json:"description"`
-	SeriesData  interface{} `json:"seriesData"` // The actual fetched series data (slice of bcchapi.SeriesData)
+	Description string                            `json:"description"`
+	SeriesData  map[string]bcchapi.SeriesDataResp `json:"seriesData"`
 }
 
 var vizCmd = &cobra.Command{
@@ -54,7 +54,7 @@ take a look at 'search --predefined'
 		availableSetsSeries := map[string]Set{
 			"EMPLOYMENT": {
 				Description: "shows the employment relation between different regions",
-				Series: []string{
+				SeriesNames: []string{
 					"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
 					"F074.IPC.VAR.Z.Z.C.M",
 					"F019.IPC.V12.10.M",
@@ -91,12 +91,12 @@ func init() {
 }
 
 // if filename is empty "", it saves it into memory?? --> redis?
-func (cfg *config) fetchSeries(setName string, set Set, filename string, MaxConcurrency int) {
+func (cfg *config) fetchSeries(setName string, set Set, filename string, maxConcurrency int) {
 	seriesSetData, seriesSetErrors := cfg.bcchapiClient.GetMultipleSeriesData(
-		set.Series,
+		set.SeriesNames,
 		"",
 		"",
-		&bcchapi.FetchOptions{MaxConcurrency: MaxConcurrency},
+		&bcchapi.FetchOptions{MaxConcurrency: maxConcurrency},
 	)
 
 	for _, err := range seriesSetErrors {
@@ -105,22 +105,19 @@ func (cfg *config) fetchSeries(setName string, set Set, filename string, MaxConc
 		}
 	}
 
-	outputDataForSet := OutputSetData{
-		Description: set.Description,
-		SeriesData:  seriesSetData, // This will be marshaled as an array in JSON
-	}
-
-	finalJSONOutput := map[string]OutputSetData{
-		setName: outputDataForSet,
+	outputSetData := map[string]OutputSetData{
+		setName: {
+			Description: set.Description,
+			SeriesData:  seriesSetData,
+		},
 	}
 
 	if err := fileio.SaveSeriesToJSON(
-		finalJSONOutput,
+		outputSetData,
 		filename,
 	); err != nil {
 		fmt.Printf("Failed to save JSON: %v\n", err)
 	}
-	return
 }
 
 func StartVizServer(publicDir, port string) error {
