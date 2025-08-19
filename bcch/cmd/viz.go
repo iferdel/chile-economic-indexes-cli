@@ -66,6 +66,12 @@ take a look at 'search --predefined-sets'
 
 		setNameFlag, _ := cmd.Flags().GetString("set")
 		setName := strings.ToUpper(setNameFlag)
+		portFlag, _ := cmd.Flags().GetString("port")
+
+		// Use default set if none specified
+		if setName == "" {
+			setName = "EMPLOYMENT"
+		}
 
 		set, ok := AvailableSetsSeries[setName]
 		if !ok {
@@ -75,7 +81,7 @@ take a look at 'search --predefined-sets'
 		cfg.fetchSeries(setName, set, "./public/series.json", 3)
 
 		// can later use go for --detached mode
-		if err := StartVizServer("public", "49966"); err != nil {
+		if err := StartVizServer("public", portFlag); err != nil {
 			log.Fatalf("viz server error: %v", err)
 		}
 	}),
@@ -87,7 +93,8 @@ func init() {
 	// then it can be extended with other 'sets'
 	// and also with flags such as 'detached mode'
 	rootCmd.AddCommand(vizCmd)
-	vizCmd.Flags().String("set", "", "Predefined set of data to viz predefined graphs")
+	vizCmd.Flags().String("set", "", "Predefined set of data to viz predefined graphs (default: EMPLOYMENT)")
+	vizCmd.Flags().StringP("port", "p", "49966", "Port for the visualization server")
 }
 
 // if filename is empty "", it saves it into memory?? --> redis?
