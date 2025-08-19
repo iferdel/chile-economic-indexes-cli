@@ -22,6 +22,27 @@ type config struct {
 	spinner       *spinner.Spinner
 }
 
+type Set struct {
+	Description string
+	SeriesNames []string
+}
+
+var AvailableSetsSeries = map[string]Set{
+	"EMPLOYMENT": {
+		Description: "shows the employment relation between different regions",
+		SeriesNames: []string{
+			"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
+			"F074.IPC.VAR.Z.Z.C.M",
+			"F019.IPC.V12.10.M",
+			"F019.PPB.PRE.100.D",
+			"F073.TCO.PRE.Z.D",
+			"F049.DES.TAS.INE9.10.M",
+			"F049.DES.TAS.INE9.26.M",
+			"F049.DES.TAS.INE9.12.M",
+		},
+	},
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "bcch",
 	Short: "CLI Tool for Interacting with the Banco Central de Chile (BCCh) API",

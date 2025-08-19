@@ -40,14 +40,7 @@ var searchCmd = &cobra.Command{
 		keywordFlag, _ := cmd.Flags().GetString("keyword")
 
 		validFrequencies := []string{"DAILY", "MONTHLY", "QUARTERLY", "ANNUAL"}
-		found := false
-		for _, freq := range validFrequencies {
-			if frequencyFlag == freq {
-				found = true
-				break
-			}
-		}
-		if !found {
+		if !slices.Contains(validFrequencies, frequencyFlag) {
 			fmt.Println("--frequency must be one of: DAILY, MONTHLY, QUARTERLY, ANNUAL.")
 			return
 		}

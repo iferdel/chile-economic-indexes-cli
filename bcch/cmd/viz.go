@@ -15,30 +15,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Set struct {
-	Description string
-	SeriesNames []string
-}
-
 type OutputSetData struct {
 	Description string                            `json:"description"`
 	SeriesData  map[string]bcchapi.SeriesDataResp `json:"seriesData"`
-}
-
-var AvailableSetsSeries = map[string]Set{
-	"EMPLOYMENT": {
-		Description: "shows the employment relation between different regions",
-		SeriesNames: []string{
-			"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
-			"F074.IPC.VAR.Z.Z.C.M",
-			"F019.IPC.V12.10.M",
-			"F019.PPB.PRE.100.D",
-			"F073.TCO.PRE.Z.D",
-			"F049.DES.TAS.INE9.10.M",
-			"F049.DES.TAS.INE9.26.M",
-			"F049.DES.TAS.INE9.12.M",
-		},
-	},
 }
 
 var vizCmd = &cobra.Command{
@@ -56,7 +35,6 @@ To check which set of series are available in this version,
 take a look at 'search --predefined-sets'
 		`,
 	Example: "bcch viz",
-	//Example: "bcch viz UN --detached",
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
 		err := cfg.bcchapiClient.AuthConfig.Load()
 		if err != nil {
@@ -88,10 +66,7 @@ take a look at 'search --predefined-sets'
 }
 
 func init() {
-	// first uses only one 'fetch' function that fetches
-	// one set of data series from BCCh api
-	// then it can be extended with other 'sets'
-	// and also with flags such as 'detached mode'
+	// can be expanded with flag such as 'detached mode'
 	rootCmd.AddCommand(vizCmd)
 	vizCmd.Flags().String("set", "", "Predefined set of data to viz predefined graphs (default: EMPLOYMENT)")
 	vizCmd.Flags().StringP("port", "p", "49966", "Port for the visualization server")
