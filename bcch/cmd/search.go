@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -12,6 +14,18 @@ var searchCmd = &cobra.Command{
 	Short: "Search the whole list of available data series to be queried.",
 	Long:  `Every data series has their own ID which may be used on get command to retrieve its data.`,
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
+		predefinedSetsFlag, _ := cmd.Flags().GetBool("predefined-sets")
+		
+		if predefinedSetsFlag {
+			fmt.Println("Available predefined sets for visualization:")
+			setNames := slices.Sorted(maps.Keys(AvailableSetsSeries))
+			for _, setName := range setNames {
+				set := AvailableSetsSeries[setName]
+				fmt.Printf("- %s: %s\n", setName, set.Description)
+			}
+			return
+		}
+
 		err := cfg.bcchapiClient.AuthConfig.Load()
 		if err != nil {
 			fmt.Printf("error loading credentials: %v\n", err)
@@ -64,4 +78,5 @@ func init() {
 	rootCmd.AddCommand(searchCmd)
 	searchCmd.Flags().StringP("frequency", "f", "", "Frequency of the data: DAILY, MONTHLY, QUARTERLY, or ANNUAL")
 	searchCmd.Flags().StringP("keyword", "k", "", "Keyword to be used to filter the list of series")
+	searchCmd.Flags().Bool("predefined-sets", false, "List available predefined sets for visualization")
 }

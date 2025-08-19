@@ -25,6 +25,22 @@ type OutputSetData struct {
 	SeriesData  map[string]bcchapi.SeriesDataResp `json:"seriesData"`
 }
 
+var AvailableSetsSeries = map[string]Set{
+	"EMPLOYMENT": {
+		Description: "shows the employment relation between different regions",
+		SeriesNames: []string{
+			"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
+			"F074.IPC.VAR.Z.Z.C.M",
+			"F019.IPC.V12.10.M",
+			"F019.PPB.PRE.100.D",
+			"F073.TCO.PRE.Z.D",
+			"F049.DES.TAS.INE9.10.M",
+			"F049.DES.TAS.INE9.26.M",
+			"F049.DES.TAS.INE9.12.M",
+		},
+	},
+}
+
 var vizCmd = &cobra.Command{
 	Use:   "viz",
 	Short: "Launch a visualization for a set of series",
@@ -37,7 +53,7 @@ that are fetched from the BCCh API.
 By default, the server runs on http://localhost:49966,
 but you can configure the port and other options with flags.
 To check which set of series are available in this version,
-take a look at 'search --predefined'
+take a look at 'search --predefined-sets'
 		`,
 	Example: "bcch viz",
 	//Example: "bcch viz UN --detached",
@@ -51,25 +67,9 @@ take a look at 'search --predefined'
 		setNameFlag, _ := cmd.Flags().GetString("set")
 		setName := strings.ToUpper(setNameFlag)
 
-		availableSetsSeries := map[string]Set{
-			"EMPLOYMENT": {
-				Description: "shows the employment relation between different regions",
-				SeriesNames: []string{
-					"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
-					"F074.IPC.VAR.Z.Z.C.M",
-					"F019.IPC.V12.10.M",
-					"F019.PPB.PRE.100.D",
-					"F073.TCO.PRE.Z.D",
-					"F049.DES.TAS.INE9.10.M",
-					"F049.DES.TAS.INE9.26.M",
-					"F049.DES.TAS.INE9.12.M",
-				},
-			},
-		}
-
-		set, ok := availableSetsSeries[setName]
+		set, ok := AvailableSetsSeries[setName]
 		if !ok {
-			log.Fatalf("serie %q not present in available series: %v", setName, slices.Sorted(maps.Keys(availableSetsSeries)))
+			log.Fatalf("serie %q not present in available series: %v", setName, slices.Sorted(maps.Keys(AvailableSetsSeries)))
 		}
 
 		cfg.fetchSeries(setName, set, "./public/series.json", 3)
