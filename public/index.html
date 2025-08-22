@@ -1,12 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>BCCh Data Visualization</title>
-  <script src="main.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chile Economic Indicators Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>'XXXX' DataSet</h1>
-  <canvas id="chart"></canvas>
+    <div class="container">
+        <header>
+            <h1>Chile Economic Indicators Dashboard</h1>
+            <p>Economic phenomena visualization through key Chilean indicators (2014-2024)</p>
+            <p class="data-source">Data source: Banco Central de Chile (BCCh)</p>
+        </header>
+
+        <main>
+            <!-- Unemployment vs Imacec Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>Unemployment Rates & Economic Activity Index (Imacec)</h2>
+                    <p class="chart-description">
+                        Annual unemployment rates (nationally and by regions) with Monthly Index of Economic Activity (Imacec rate).
+                        Shows relationship between employment levels and economic activity across different Chilean regions.
+                    </p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="unemploymentChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Exchange Rate vs Copper Price Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>USD Exchange Rate & Copper Price</h2>
+                    <p class="chart-description">
+                        Chilean currency exchange rate per USD and copper value (USD/lb). 
+                        Demonstrates the relationship between currency valuation and Chile's main export commodity.
+                    </p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="exchangeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Consumer Price Index Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>Consumer Price Index (CPI) Comparison</h2>
+                    <p class="chart-description">
+                        Consumer Price Index comparison between Chile and United States.
+                        Shows inflation trends and comparative price level changes between both economies.
+                    </p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="cpiChart"></canvas>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Generated with Chilean Economic Indexes CLI - Data visualization of BCCh indicators</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
 </body>
 </html>
