@@ -52,19 +52,32 @@ Or any other relevant way to install the tool.
 
 ### Available Commands
 
-- **`help`**: Display help information for any command.
-- **`setCredentials`**: Save credentials for BCCh API access locally.
-- **`search`**: Search the full list of available data series, with options to filter by keywords and frequency.
-- **`get`**: Retrieve data from a specific data series by series ID.
+#### `help`
+Display help information for any command.
 
-### Flags
+#### `setCredentials`
+Save credentials for BCCh API access locally.
+- `-u`, `--user` - User for BCCh API
+- `-p`, `--password` - Password for BCCh API
 
-- `-h`, `--help` - Show help for any command.
-- `-k`, `--keyword` - Filter search results by keyword (used with the `search` command).
-- `-f`, `--frequency` - Filter search results by frequency (`DAILY`, `MONTHLY`, `ANNUAL`) (used with the `search` command).
-- `-s`, `--series` - Specify the series ID to retrieve data from (used with the `get` command).
-- `-u`, `--user` - User for BCCh API (used with the `setCredentials` command).
-- `-p`, `--password` - Password for BCCh API (used with the `setCredentials` command).
+#### `search`
+Search the full list of available data series, with options to filter by keywords and frequency.
+- `-k`, `--keyword` - Filter search results by keyword
+- `-f`, `--frequency` - Filter search results by frequency (`DAILY`, `MONTHLY`, `ANNUAL`)
+- `--predefined-sets` - List all available predefined sets of series
+
+#### `get`
+Retrieve data from a specific data series by series ID.
+- `-s`, `--series` - Specify the series ID to retrieve data from
+
+#### `viz`
+Opens a local webserver which shows visualizations for a specific set of series from BCCh API.
+- `--set` - Specify which set of series to use for visualization (default: EMPLOYMENT)
+- `-p`, `--port` - Specify port for the local web server (default: 49966)
+
+### Global Flags
+
+- `-h`, `--help` - Show help for any command
 
 ## ⚡ Examples
 
