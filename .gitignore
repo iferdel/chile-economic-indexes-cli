@@ -33,4 +33,8 @@ bcch.bash
 bcch.fish
 bcch.ps1
 
+# Data
 series.json
+
+# Claude + MCP
+.playwright-mcp/
