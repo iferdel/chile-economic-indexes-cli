@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chile Economic Indicators Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -11,22 +14,43 @@
     <div class="container">
         <header>
             <h1>Chile Economic Indicators Dashboard</h1>
-            <p>Economic phenomena visualization through key Chilean indicators (2014-2024)</p>
+            <p>Professional economic data visualization following data-to-viz.com best practices (2010-2025)</p>
             <p class="data-source">Data source: Banco Central de Chile (BCCh)</p>
         </header>
 
         <main>
-            <!-- Unemployment vs Imacec Chart -->
+            <!-- Data Overview Panel -->
+            <div class="data-info">
+                <strong>Chilean Economic Dashboard</strong> - Real-time visualization of key economic indicators from Banco Central de Chile (BCCh). 
+                Data is automatically updated and covers the period from 2010 to present, showing <strong>unemployment trends</strong>, 
+                <strong>currency exchange rates</strong>, and <strong>inflation comparisons</strong> across different regions and time periods.
+            </div>
+
+            <!-- Regional Unemployment Rates Chart -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h2>Unemployment Rates & Economic Activity Index (Imacec)</h2>
+                    <h2>Regional Unemployment Rates Comparison</h2>
                     <p class="chart-description">
-                        Annual unemployment rates (nationally and by regions) with Monthly Index of Economic Activity (Imacec rate).
-                        Shows relationship between employment levels and economic activity across different Chilean regions.
+                        Unemployment rates across Chile: national average and regional variations in Antofagasta and Ñuble.
+                        Following data-to-viz.com best practices with single Y-axis for accurate comparison.
                     </p>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="unemploymentChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Economic Activity Index (Imacec) Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>Monthly Index of Economic Activity (Imacec)</h2>
+                    <p class="chart-description">
+                        Year-over-year change in Chile's Monthly Index of Economic Activity (Imacec). 
+                        Separated from unemployment data to follow data visualization best practices against dual Y-axes.
+                    </p>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="imacecChart"></canvas>
                 </div>
             </div>
 

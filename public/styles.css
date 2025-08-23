@@ -1,4 +1,33 @@
-/* Reset and base styles */
+/* Clean, Minimal Design Following data-to-viz.com Principles */
+:root {
+    /* Simplified Colors - Minimal Palette */
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-light: #999999;
+    --background: #ffffff;
+    --border-light: #e0e0e0;
+    --border-medium: #cccccc;
+    
+    /* Chart Colors - Simple, Clean Palette */
+    --chart-primary: #2166ac;
+    --chart-secondary: #762a83;
+    --chart-third: #5aae61;
+    --chart-fourth: #d6604d;
+    --chart-fifth: #f4a582;
+    
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    
+    /* Spacing - Generous White Space */
+    --space-xs: 8px;
+    --space-sm: 16px;
+    --space-md: 24px;
+    --space-lg: 32px;
+    --space-xl: 48px;
+    --space-2xl: 64px;
+}
+
+/* Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -6,84 +35,77 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+    font-family: var(--font-family);
+    line-height: 1.5;
+    color: var(--text-primary);
+    background: var(--background);
+    font-size: 16px;
+    font-weight: 400;
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: var(--space-lg);
 }
 
-/* Header styles */
+/* Clean Header */
 header {
     text-align: center;
-    margin-bottom: 3rem;
-    padding: 2rem 0;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-xl) 0;
+    border-bottom: 1px solid var(--border-light);
 }
 
 header h1 {
-    font-size: 2.5rem;
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    font-weight: 700;
+    font-size: 32px;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+    font-weight: 600;
 }
 
 header p {
-    font-size: 1.1rem;
-    color: #7f8c8d;
-    margin-bottom: 0.5rem;
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+    line-height: 1.5;
 }
 
 .data-source {
-    font-style: italic;
-    color: #95a5a6;
-    font-size: 0.95rem;
+    font-size: 14px;
+    color: var(--text-light);
 }
 
-/* Chart container styles */
+/* Simple Chart Container */
 .chart-container {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    padding: 2rem;
-    margin-bottom: 3rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: var(--space-2xl);
+    padding: 0;
 }
 
 .chart-header {
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-lg);
 }
 
 .chart-header h2 {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 1rem;
+    font-size: 22px;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
     font-weight: 600;
 }
 
 .chart-description {
-    font-size: 1rem;
-    color: #7f8c8d;
-    line-height: 1.7;
-    max-width: 800px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: var(--space-md);
 }
 
 .chart-wrapper {
     position: relative;
-    height: 500px;
-    background: white;
-    border-radius: 10px;
-    padding: 1rem;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+    height: 450px;
+    background: var(--background);
+    border: 1px solid var(--border-light);
+    padding: var(--space-md);
 }
 
 /* Chart canvas responsiveness */
@@ -92,121 +114,61 @@ canvas {
     height: auto !important;
 }
 
-/* Footer styles */
+/* Simple Footer */
 footer {
     text-align: center;
-    padding: 2rem 0;
-    margin-top: 3rem;
-    color: #95a5a6;
-    font-size: 0.9rem;
+    padding: var(--space-xl) 0;
+    margin-top: var(--space-2xl);
+    border-top: 1px solid var(--border-light);
 }
 
-/* Loading state */
+footer p {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+/* Simple Loading State */
 .loading {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 400px;
-    font-size: 1.2rem;
-    color: #7f8c8d;
+    height: 300px;
+    font-size: 16px;
+    color: var(--text-secondary);
 }
 
-.loading::after {
-    content: '';
-    width: 20px;
-    height: 20px;
-    margin-left: 10px;
-    border: 2px solid #ddd;
-    border-top: 2px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
     .container {
-        padding: 10px;
+        padding: var(--space-sm);
     }
     
     header h1 {
-        font-size: 2rem;
-    }
-    
-    .chart-container {
-        padding: 1.5rem;
-        margin-bottom: 2rem;
+        font-size: 28px;
     }
     
     .chart-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .chart-wrapper {
-        height: 400px;
-    }
-}
-
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.7rem;
-    }
-    
-    .chart-container {
-        padding: 1rem;
+        font-size: 20px;
     }
     
     .chart-wrapper {
         height: 350px;
+        padding: var(--space-sm);
     }
 }
 
-/* Custom chart colors - matching the notebook's seaborn style */
-.chart-color-blue {
-    color: #4e79a7;
-}
-
-.chart-color-red {
-    color: #e15759;
-}
-
-.chart-color-orange {
-    color: #f28e2c;
-}
-
-.chart-color-green {
-    color: #76b7b2;
-}
-
-.chart-color-purple {
-    color: #af7aa1;
-}
-
-/* Error state */
-.error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 1rem;
-    border-radius: 8px;
-    border-left: 4px solid #e53935;
-    margin: 1rem 0;
-}
-
-/* Data info panel */
+/* Simple Data Info Panel */
 .data-info {
-    background: rgba(52, 152, 219, 0.1);
-    border: 1px solid rgba(52, 152, 219, 0.2);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 2rem;
-    font-size: 0.9rem;
-    color: #2980b9;
+    border: 1px solid var(--border-light);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    background: #fafafa;
 }
 
 .data-info strong {
-    color: #1565c0;
+    color: var(--text-primary);
+    font-weight: 600;
 }

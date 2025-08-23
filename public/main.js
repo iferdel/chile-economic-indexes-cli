@@ -1,13 +1,124 @@
 // Main JavaScript file for Chile Economic Indicators Dashboard
 let seriesData = null;
 
-// Color scheme matching the notebook's seaborn style
+// Clean, minimal color scheme following data-to-viz.com principles
 const colors = {
-    skyblue: '#87CEEB',
-    steelblue: '#4682B4',
-    red: '#DC143C',
-    darkblue: '#00008B',
-    lightgray: '#D3D3D3'
+    // Simple, professional chart colors
+    chartPrimary: '#2166ac',
+    chartSecondary: '#762a83',
+    chartThird: '#5aae61',
+    chartFourth: '#d6604d',
+    chartFifth: '#f4a582',
+    
+    // Text colors
+    textPrimary: '#333333',
+    textSecondary: '#666666',
+    textLight: '#999999',
+    
+    // Background colors
+    background: '#ffffff',
+    backgroundLight: '#fafafa'
+};
+
+// Minimal chart configuration following data-to-viz.com principles
+const chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: true,
+            position: 'bottom',
+            align: 'center',
+            labels: {
+                usePointStyle: false,
+                padding: 20,
+                font: {
+                    size: 13,
+                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                },
+                color: colors.textPrimary,
+                boxWidth: 15,
+                boxHeight: 2
+            }
+        },
+        tooltip: {
+            backgroundColor: colors.background,
+            titleColor: colors.textPrimary,
+            bodyColor: colors.textSecondary,
+            borderColor: '#e0e0e0',
+            borderWidth: 1,
+            cornerRadius: 4,
+            displayColors: true,
+            mode: 'index',
+            intersect: false,
+            padding: 12,
+            titleFont: {
+                size: 13,
+                weight: '600'
+            },
+            bodyFont: {
+                size: 12
+            },
+            callbacks: {
+                label: function(context) {
+                    const label = context.dataset.label || '';
+                    const value = context.parsed.y;
+                    const unit = label.includes('%') ? '%' : 
+                                label.includes('Rate') ? '' : 
+                                label.includes('CLP') ? ' CLP' :
+                                label.includes('USD') ? ' USD' : '';
+                    return `${label}: ${Number(value).toLocaleString('en-US', { 
+                        minimumFractionDigits: 2, 
+                        maximumFractionDigits: 2 
+                    })}${unit}`;
+                }
+            }
+        }
+    },
+    interaction: {
+        mode: 'index',
+        intersect: false,
+    },
+    elements: {
+        point: {
+            radius: 0,
+            hoverRadius: 4,
+            hoverBorderWidth: 2,
+            backgroundColor: colors.background,
+            borderWidth: 2
+        },
+        line: {
+            tension: 0
+        }
+    },
+    animation: {
+        duration: 0
+    },
+    scales: {
+        x: {
+            grid: {
+                display: false
+            },
+            ticks: {
+                color: colors.textSecondary,
+                font: {
+                    size: 11
+                }
+            }
+        },
+        y: {
+            grid: {
+                color: '#f0f0f0',
+                lineWidth: 1
+            },
+            ticks: {
+                color: colors.textSecondary,
+                font: {
+                    size: 11
+                }
+            }
+        }
+    }
 };
 
 // Load and parse series data
@@ -189,41 +300,48 @@ function createUnemploymentChart() {
             labels: labels,
             datasets: [
                 {
-                    label: 'Unemployment (%) - National',
+                    label: 'National Unemployment Rate (%)',
                     data: alignedData.alignedData[0],
-                    borderColor: colors.skyblue,
-                    backgroundColor: colors.skyblue + '40',
-                    fill: true,
-                    yAxisID: 'y',
-                    tension: 0.1
+                    borderColor: colors.chartPrimary,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointBackgroundColor: colors.chartPrimary,
+                    pointBorderColor: colors.background,
+                    pointBorderWidth: 2,
+                    tension: 0
                 },
                 {
-                    label: 'Unemployment (%) - Antofagasta',
+                    label: 'Antofagasta Region (%)',
                     data: alignedData.alignedData[1],
-                    borderColor: colors.steelblue,
+                    borderColor: colors.chartSecondary,
                     backgroundColor: 'transparent',
-                    borderDash: [5, 5],
-                    yAxisID: 'y',
-                    tension: 0.1
+                    fill: false,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointBackgroundColor: colors.chartSecondary,
+                    pointBorderColor: colors.background,
+                    pointBorderWidth: 2,
+                    tension: 0
                 },
                 {
-                    label: 'Unemployment (%) - Ñuble',
+                    label: 'Ñuble Region (%)',
                     data: alignedData.alignedData[2],
-                    borderColor: colors.steelblue,
+                    borderColor: colors.chartThird,
                     backgroundColor: 'transparent',
-                    borderDash: [2, 2],
-                    yAxisID: 'y',
-                    tension: 0.1
-                },
-                {
-                    label: 'Imacec Rate (YoY change)',
-                    data: alignedData.alignedData[3],
-                    borderColor: colors.red,
-                    backgroundColor: 'transparent',
-                    yAxisID: 'y1',
-                    tension: 0.1,
-                    pointRadius: 2
+                    fill: false,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointBackgroundColor: colors.chartThird,
+                    pointBorderColor: colors.background,
+                    pointBorderWidth: 2,
+                    tension: 0
                 }
+                // Removed Imacec from this chart to avoid dual Y-axis issue
             ]
         },
         options: {
@@ -247,9 +365,26 @@ function createUnemploymentChart() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Date (Year-Month)'
+                        text: 'Date (Year-Month)',
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
+                    },
+                    ticks: {
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 10
+                        },
+                        maxTicksLimit: 12
                     },
                     grid: {
+                        display: true,
+                        color: 'rgba(33, 37, 41, 0.05)',
+                        drawBorder: false
+                    },
+                    border: {
                         display: false
                     }
                 },
@@ -260,31 +395,30 @@ function createUnemploymentChart() {
                     title: {
                         display: true,
                         text: 'Unemployment Rate (%)',
-                        color: colors.steelblue
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        }
                     },
                     ticks: {
-                        color: colors.steelblue
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 11
+                        }
                     },
                     grid: {
-                        display: false
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
                         display: true,
-                        text: 'Imacec Rate (YoY %)',
-                        color: colors.red
+                        color: 'rgba(105, 179, 162, 0.08)',
+                        drawBorder: false
                     },
-                    ticks: {
-                        color: colors.red
+                    border: {
+                        display: false
                     },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
+                    // Following data-to-viz: unemployment rates don't need to start at 0
+                    beginAtZero: false
                 }
+                // Removed dual Y-axis as per data-to-viz.com recommendation against dual axes
             }
         }
     };
@@ -293,12 +427,112 @@ function createUnemploymentChart() {
 
     console.log('Unemployment chart created successfully');
     
+    // Create separate Imacec chart to follow data-to-viz best practices (avoid dual Y-axis)
+    createImacecChart(imacecRateDataset);
+    
     } catch (error) {
         console.error('Error creating unemployment chart:', error);
         const wrapper = document.querySelector('#unemploymentChart').closest('.chart-wrapper');
         if (wrapper) {
             wrapper.innerHTML = '<div class="error-message">Error creating unemployment chart: ' + error.message + '</div>';
         }
+    }
+}
+
+// Create separate Imacec chart following data-to-viz best practices
+function createImacecChart(imacecData) {
+    try {
+        const canvas = document.getElementById('imacecChart');
+        if (!canvas) {
+            console.error('Canvas element not found: imacecChart');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        
+        const config = {
+            type: 'line',
+            data: {
+                labels: imacecData.labels,
+                datasets: [{
+                    label: 'Monthly Index of Economic Activity (Imacec) - YoY Change (%)',
+                    data: imacecData.data,
+                    borderColor: colors.chartFourth,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: colors.chartDanger,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date (Year-Month)',
+                            color: colors.darkNeutral,
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        },
+                        ticks: {
+                            color: colors.darkNeutral,
+                            font: {
+                                size: 10
+                            },
+                            maxTicksLimit: 12
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(33, 37, 41, 0.05)',
+                            drawBorder: false
+                        },
+                        border: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Year-over-Year Change (%)',
+                            color: colors.darkNeutral,
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        },
+                        ticks: {
+                            color: colors.darkNeutral,
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(225, 87, 89, 0.08)',
+                            drawBorder: false
+                        },
+                        border: {
+                            display: false
+                        },
+                        // Add zero line for economic indicator reference
+                        beginAtZero: true
+                    }
+                }
+            }
+        };
+        
+        new Chart(ctx, config);
+        console.log('Imacec chart created successfully');
+        
+    } catch (error) {
+        console.error('Error creating Imacec chart:', error);
     }
 }
 
@@ -338,47 +572,67 @@ function createExchangeChart() {
                 {
                     label: 'USD to CLP Exchange Rate',
                     data: alignedData.dataset1,
-                    borderColor: colors.skyblue,
+                    borderColor: colors.chartPrimary,
                     backgroundColor: 'transparent',
-                    yAxisID: 'y',
-                    tension: 0.1,
-                    pointRadius: 0.5
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: colors.chartPrimary,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    tension: 0.1
                 },
                 {
                     label: 'Copper Price (USD/lb)',
                     data: alignedData.dataset2,
-                    borderColor: colors.red,
+                    borderColor: colors.chartDanger,
                     backgroundColor: 'transparent',
                     yAxisID: 'y1',
-                    tension: 0.1,
-                    pointRadius: 0.5
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: colors.chartDanger,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    tension: 0.1
                 }
             ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
+            ...chartDefaults,
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
+                ...chartDefaults.plugins,
+                title: {
+                    display: false
                 }
             },
             scales: {
                 x: {
                     title: {
                         display: true,
-                        text: 'Date (Year-Month)'
+                        text: 'Date (Year-Month)',
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: chartDefaults.plugins.legend.labels.font.family
+                        }
+                    },
+                    ticks: {
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 10,
+                            weight: '500'
+                        },
+                        maxTicksLimit: 12,
+                        padding: 8
                     },
                     grid: {
+                        display: true,
+                        color: 'rgba(33, 37, 41, 0.08)',
+                        drawBorder: false
+                    },
+                    border: {
                         display: false
                     }
                 },
@@ -389,12 +643,27 @@ function createExchangeChart() {
                     title: {
                         display: true,
                         text: 'USD to CLP Exchange Rate',
-                        color: colors.steelblue
+                        color: colors.chartPrimary,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: chartDefaults.plugins.legend.labels.font.family
+                        }
                     },
                     ticks: {
-                        color: colors.steelblue
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        padding: 8
                     },
                     grid: {
+                        display: true,
+                        color: 'rgba(105, 179, 162, 0.1)',
+                        drawBorder: false
+                    },
+                    border: {
                         display: false
                     }
                 },
@@ -405,14 +674,28 @@ function createExchangeChart() {
                     title: {
                         display: true,
                         text: 'Copper Price (USD/lb)',
-                        color: colors.red
+                        color: colors.chartDanger,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: chartDefaults.plugins.legend.labels.font.family
+                        }
                     },
                     ticks: {
-                        color: colors.red
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        padding: 8
                     },
                     grid: {
                         drawOnChartArea: false,
+                        color: 'rgba(225, 87, 89, 0.1)'
                     },
+                    border: {
+                        display: false
+                    }
                 }
             }
         }
@@ -472,45 +755,67 @@ function createCPIChart() {
                 {
                     label: 'CPI Chile (Monthly Variation %)',
                     data: alignedData.dataset1,
-                    borderColor: colors.skyblue,
-                    backgroundColor: 'transparent',
-                    tension: 0.1,
-                    pointRadius: 1
+                    borderColor: colors.chartPrimary,
+                    backgroundColor: colors.chartPrimary + '15',
+                    fill: true,
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointBackgroundColor: colors.chartPrimary,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    tension: 0.1
                 },
                 {
                     label: 'CPI USA (12-month Variation %)',
                     data: alignedData.dataset2,
-                    borderColor: colors.red,
+                    borderColor: colors.chartDanger,
                     backgroundColor: 'transparent',
-                    tension: 0.1,
-                    pointRadius: 1
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointBackgroundColor: colors.chartDanger,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    tension: 0.1
                 }
             ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
+            ...chartDefaults,
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
+                ...chartDefaults.plugins,
+                title: {
+                    display: false
                 }
             },
             scales: {
                 x: {
                     title: {
                         display: true,
-                        text: 'Date (Year-Month)'
+                        text: 'Date (Year-Month)',
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: chartDefaults.plugins.legend.labels.font.family
+                        }
+                    },
+                    ticks: {
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 10,
+                            weight: '500'
+                        },
+                        maxTicksLimit: 15,
+                        padding: 8
                     },
                     grid: {
+                        display: true,
+                        color: 'rgba(33, 37, 41, 0.08)',
+                        drawBorder: false
+                    },
+                    border: {
                         display: false
                     }
                 },
@@ -518,14 +823,28 @@ function createCPIChart() {
                     title: {
                         display: true,
                         text: 'Consumer Price Index (%)',
-                        color: colors.steelblue
+                        color: colors.chartPrimary,
+                        font: {
+                            size: 13,
+                            weight: '600',
+                            family: chartDefaults.plugins.legend.labels.font.family
+                        }
                     },
                     ticks: {
-                        color: colors.steelblue
+                        color: colors.darkNeutral,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        },
+                        padding: 8
                     },
                     grid: {
                         display: true,
-                        color: 'rgba(0, 0, 0, 0.1)'
+                        color: 'rgba(105, 179, 162, 0.1)',
+                        drawBorder: false
+                    },
+                    border: {
+                        display: false
                     }
                 }
             }
@@ -567,13 +886,16 @@ async function initDashboard() {
             // Restore canvas elements
             const chartWrappers = document.querySelectorAll('.chart-wrapper');
             chartWrappers[0].innerHTML = '<canvas id="unemploymentChart"></canvas>';
-            chartWrappers[1].innerHTML = '<canvas id="exchangeChart"></canvas>';
-            chartWrappers[2].innerHTML = '<canvas id="cpiChart"></canvas>';
+            chartWrappers[1].innerHTML = '<canvas id="imacecChart"></canvas>';
+            chartWrappers[2].innerHTML = '<canvas id="exchangeChart"></canvas>';
+            chartWrappers[3].innerHTML = '<canvas id="cpiChart"></canvas>';
             
             // Small delay to ensure canvas elements are rendered
             setTimeout(() => {
                 console.log('Creating unemployment chart...');
                 createUnemploymentChart();
+                
+                // Note: Imacec chart is created from within createUnemploymentChart()
                 
                 console.log('Creating exchange rate chart...');
                 createExchangeChart();
