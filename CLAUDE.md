@@ -58,15 +58,34 @@ This is a CLI tool for interacting with the Banco Central de Chile (BCCh) API, b
 The application includes predefined sets of economic indicators (defined in `bcch/cmd/root.go:30`):
 - `EMPLOYMENT` - Employment relation between different regions with 8 series IDs (
 
-### Visualization
-- Template for a python notebook with the plot of graphs that are of interest in regard of the *EMPLOYMENT* set `/context/chile-economic-indicators-project.ipynb`
-
-### Visualization Features
+## Visual Development
 - Local HTTP server serving static visualization files
 - Automatic browser opening after 2-second delay
 - JSON data export for visualization consumption
 - Configurable port (default 49966)
 
-### Testing Approach
-- Tests include cache creation, add/get operations, and expiration behavior
-- CI runs complete test suite with security and static analysis checks
+-- Template for a python notebook with the plot of graphs that are of interest in regard of the *EMPLOYMENT* set https://github.com/iferdel-vault/chile-economic-indicators/blob/main/Chile_economic_indicators_project.ipynb
+
+### Design Principles
+- Comprehensive design checklist in `.claude/context/design-principles.md`
+- Brand style guide in `.claude/context/style-guide.md`
+- When making visual (front-end, UI/UX) changes, always refer to these files for guidance
+
+### Quick Visual Check
+IMMEDIATELY after implementing any front-end change:
+1. **Identify what changed** - Review the modified components/pages
+2. **Navigate to affected pages** - Use `mcp__playwright__browser_navigate` to visit each changed view
+3. **Verify design compliance** - Compare against `/context/design-principles.md` and `/context/style-guide.md`
+4. **Validate feature implementation** - Ensure the change fulfills the user's specific request
+5. **Check acceptance criteria** - Review any provided context files or requirements
+6. **Capture evidence** - Take full page screenshot at desktop viewport (1440px) of each changed view.
+7. **Check for errors** - Run `mcp__playwright__browser_console_messages`
+
+This verification ensures changes meet design standards and user requirements.
+
+### Comprehensive Design Review
+Invoke the `@agent-design-review` subagent for thorough design validation when:
+- Completing significant UI/UX features
+- Needing comprehensive accessibility and responsiveness testing
+
+
