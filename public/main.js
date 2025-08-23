@@ -57,34 +57,57 @@ function extractSeriesData(seriesId) {
     return { data: result, labels: labels };
 }
 
-// Helper function to align two time series datasets with different temporal ranges
-function alignTemporalData(dataset1, dataset2) {
-    const data1Map = new Map();
-    const data2Map = new Map();
+// Helper function to align multiple time series datasets with different temporal ranges
+function alignTemporalData(...datasets) {
+    if (datasets.length < 2) {
+        throw new Error('alignTemporalData requires at least 2 datasets');
+    }
     
-    // Create maps for fast lookup by date
-    dataset1.labels.forEach((label, index) => {
-        data1Map.set(label, dataset1.data[index]);
+    // Create maps for fast lookup by date for each dataset
+    const dataMaps = datasets.map(dataset => {
+        const map = new Map();
+        dataset.labels.forEach((label, index) => {
+            map.set(label, dataset.data[index]);
+        });
+        return map;
     });
     
-    dataset2.labels.forEach((label, index) => {
-        data2Map.set(label, dataset2.data[index]);
-    });
+    // Find the intersection of dates across all datasets
+    let commonDates = [...dataMaps[0].keys()];
+    for (let i = 1; i < dataMaps.length; i++) {
+        commonDates = commonDates.filter(date => dataMaps[i].has(date));
+    }
     
-    // Find the intersection of dates (common time period)
-    const commonDates = [...data1Map.keys()].filter(date => data2Map.has(date));
     commonDates.sort(); // Ensure chronological order
     
-    // Extract aligned data for the common time period
-    const alignedData1 = commonDates.map(date => data1Map.get(date));
-    const alignedData2 = commonDates.map(date => data2Map.get(date));
+    if (commonDates.length === 0) {
+        console.warn('No common dates found across all datasets');
+        return {
+            labels: [],
+            alignedData: datasets.map(() => [])
+        };
+    }
     
-    console.log(`Temporal alignment: ${commonDates.length} common dates from ${commonDates[0]} to ${commonDates[commonDates.length-1]}`);
+    // Extract aligned data for the common time period
+    const alignedData = dataMaps.map(map => 
+        commonDates.map(date => map.get(date))
+    );
+    
+    console.log(`Temporal alignment: ${commonDates.length} common dates from ${commonDates[0]} to ${commonDates[commonDates.length-1]} across ${datasets.length} datasets`);
     
     return {
         labels: commonDates,
-        dataset1: alignedData1,
-        dataset2: alignedData2
+        alignedData: alignedData
+    };
+}
+
+// Legacy function for backward compatibility (2 datasets only)
+function alignTemporalDataLegacy(dataset1, dataset2) {
+    const result = alignTemporalData(dataset1, dataset2);
+    return {
+        labels: result.labels,
+        dataset1: result.alignedData[0],
+        dataset2: result.alignedData[1]
     };
 }
 
@@ -98,6 +121,7 @@ function showError(message) {
 
 // Create unemployment vs Imacec chart
 function createUnemploymentChart() {
+    try {
     const canvas = document.getElementById('unemploymentChart');
     if (!canvas) {
         console.error('Canvas element not found: unemploymentChart');
@@ -109,7 +133,13 @@ function createUnemploymentChart() {
     const nationalUnemployment = extractSeriesData('F049.DES.TAS.INE9.10.M');
     const antofagastaUnemployment = extractSeriesData('F049.DES.TAS.INE9.12.M');
     const nubleUnemployment = extractSeriesData('F049.DES.TAS.INE9.26.M');
-    const imacecData = extractSeriesData('F032.IMC.IND.Z.Z.EP13.Z.Z.0.M');
+    const imacecData = extractSeriesData('F032.IMC.IND.Z.Z.EP18.Z.Z.1.M');
+    
+    // Verify data extraction
+    console.log(`National unemployment data points: ${nationalUnemployment.data.length}`);
+    console.log(`Antofagasta unemployment data points: ${antofagastaUnemployment.data.length}`);
+    console.log(`Ñuble unemployment data points: ${nubleUnemployment.data.length}`);
+    console.log(`Imacec data points: ${imacecData.data.length}`);
     
     // Calculate Imacec rate (year-over-year change) like in the notebook
     const imacecRateData = [];
@@ -117,14 +147,41 @@ function createUnemploymentChart() {
     for (let i = 12; i < imacecData.data.length; i++) {
         const currentValue = imacecData.data[i];
         const previousYearValue = imacecData.data[i - 12];
-        if (currentValue !== null && previousYearValue !== null) {
+        if (currentValue !== null && previousYearValue !== null && !isNaN(currentValue) && !isNaN(previousYearValue)) {
             imacecRateData.push(parseFloat((currentValue - previousYearValue).toFixed(1)));
             imacecLabels.push(imacecData.labels[i]);
         }
     }
     
-    // Use the national unemployment labels as the base (most complete dataset)
-    const labels = nationalUnemployment.labels;
+    // Create processed Imacec dataset for temporal alignment
+    const imacecRateDataset = {
+        data: imacecRateData,
+        labels: imacecLabels
+    };
+    
+    console.log(`Imacec rate calculated points: ${imacecRateData.length}`);
+    
+    // Align all datasets temporally
+    const alignedData = alignTemporalData(
+        nationalUnemployment,
+        antofagastaUnemployment, 
+        nubleUnemployment,
+        imacecRateDataset
+    );
+    
+    if (alignedData.labels.length === 0) {
+        console.error('No common dates found across unemployment and Imacec datasets');
+        const wrapper = document.querySelector('#unemploymentChart').closest('.chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="error-message">No overlapping data found between unemployment and Imacec series</div>';
+        }
+        return;
+    }
+    
+    console.log(`Unemployment chart alignment: ${alignedData.labels.length} common data points from ${alignedData.labels[0]} to ${alignedData.labels[alignedData.labels.length-1]}`);
+    
+    // Use the temporally aligned labels
+    const labels = alignedData.labels;
     
     const config = {
         type: 'line',
@@ -133,7 +190,7 @@ function createUnemploymentChart() {
             datasets: [
                 {
                     label: 'Unemployment (%) - National',
-                    data: nationalUnemployment.data,
+                    data: alignedData.alignedData[0],
                     borderColor: colors.skyblue,
                     backgroundColor: colors.skyblue + '40',
                     fill: true,
@@ -142,7 +199,7 @@ function createUnemploymentChart() {
                 },
                 {
                     label: 'Unemployment (%) - Antofagasta',
-                    data: antofagastaUnemployment.data,
+                    data: alignedData.alignedData[1],
                     borderColor: colors.steelblue,
                     backgroundColor: 'transparent',
                     borderDash: [5, 5],
@@ -151,7 +208,7 @@ function createUnemploymentChart() {
                 },
                 {
                     label: 'Unemployment (%) - Ñuble',
-                    data: nubleUnemployment.data,
+                    data: alignedData.alignedData[2],
                     borderColor: colors.steelblue,
                     backgroundColor: 'transparent',
                     borderDash: [2, 2],
@@ -160,7 +217,7 @@ function createUnemploymentChart() {
                 },
                 {
                     label: 'Imacec Rate (YoY change)',
-                    data: imacecRateData,
+                    data: alignedData.alignedData[3],
                     borderColor: colors.red,
                     backgroundColor: 'transparent',
                     yAxisID: 'y1',
@@ -233,6 +290,16 @@ function createUnemploymentChart() {
     };
     
     new Chart(ctx, config);
+
+    console.log('Unemployment chart created successfully');
+    
+    } catch (error) {
+        console.error('Error creating unemployment chart:', error);
+        const wrapper = document.querySelector('#unemploymentChart').closest('.chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="error-message">Error creating unemployment chart: ' + error.message + '</div>';
+        }
+    }
 }
 
 // Create exchange rate vs copper price chart
@@ -253,7 +320,7 @@ function createExchangeChart() {
         console.log(`Exchange rate data points: ${exchangeRateData.data.length}, Copper price data points: ${copperPriceData.data.length}`);
         
         // Align datasets temporally to handle different start dates
-        const alignedData = alignTemporalData(exchangeRateData, copperPriceData);
+        const alignedData = alignTemporalDataLegacy(exchangeRateData, copperPriceData);
         
         if (alignedData.labels.length === 0) {
             console.error('No common dates found between exchange rate and copper price data');
@@ -365,6 +432,7 @@ function createExchangeChart() {
 
 // Create CPI comparison chart
 function createCPIChart() {
+    try {
     const canvas = document.getElementById('cpiChart');
     if (!canvas) {
         console.error('Canvas element not found: cpiChart');
@@ -376,8 +444,25 @@ function createCPIChart() {
     const chileIPCData = extractSeriesData('F074.IPC.VAR.Z.Z.C.M');
     const usaIPCData = extractSeriesData('F019.IPC.V12.10.M');
     
-    // Use the Chile IPC labels as the base (more complete dataset)
-    const labels = chileIPCData.labels;
+    // Verify data extraction
+    console.log(`Chile IPC data points: ${chileIPCData.data.length}`);
+    console.log(`USA IPC data points: ${usaIPCData.data.length}`);
+    
+    // Align datasets temporally to handle different start dates
+    const alignedData = alignTemporalDataLegacy(chileIPCData, usaIPCData);
+    
+    if (alignedData.labels.length === 0) {
+        console.error('No common dates found between Chile and USA IPC data');
+        const wrapper = document.querySelector('#cpiChart').closest('.chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="error-message">No overlapping data found between Chile and USA IPC series</div>';
+        }
+        return;
+    }
+    
+    console.log(`CPI chart alignment: ${alignedData.labels.length} common data points from ${alignedData.labels[0]} to ${alignedData.labels[alignedData.labels.length-1]}`);
+    
+    const labels = alignedData.labels;
     
     const config = {
         type: 'line',
@@ -386,7 +471,7 @@ function createCPIChart() {
             datasets: [
                 {
                     label: 'CPI Chile (Monthly Variation %)',
-                    data: chileIPCData.data,
+                    data: alignedData.dataset1,
                     borderColor: colors.skyblue,
                     backgroundColor: 'transparent',
                     tension: 0.1,
@@ -394,7 +479,7 @@ function createCPIChart() {
                 },
                 {
                     label: 'CPI USA (12-month Variation %)',
-                    data: usaIPCData.data,
+                    data: alignedData.dataset2,
                     borderColor: colors.red,
                     backgroundColor: 'transparent',
                     tension: 0.1,
@@ -448,6 +533,16 @@ function createCPIChart() {
     };
     
     new Chart(ctx, config);
+
+    console.log('CPI chart created successfully');
+    
+    } catch (error) {
+        console.error('Error creating CPI chart:', error);
+        const wrapper = document.querySelector('#cpiChart').closest('.chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="error-message">Error creating CPI chart: ' + error.message + '</div>';
+        }
+    }
 }
 
 // Initialize dashboard

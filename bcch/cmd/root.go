@@ -31,7 +31,7 @@ var AvailableSetsSeries = map[string]Set{
 	"EMPLOYMENT": {
 		Description: "shows the employment relation between different regions",
 		SeriesNames: []string{
-			"F032.IMC.IND.Z.Z.EP13.Z.Z.0.M",
+			"F032.IMC.IND.Z.Z.EP18.Z.Z.1.M",
 			"F074.IPC.VAR.Z.Z.C.M",
 			"F019.IPC.V12.10.M",
 			"F019.PPB.PRE.100.D",
