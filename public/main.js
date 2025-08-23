@@ -130,11 +130,49 @@ async function loadSeriesData() {
         window.seriesData = seriesData; // Make it globally accessible for debugging
         console.log('Series data loaded successfully');
         console.log('Available series:', Object.keys(seriesData));
+        
+        // Calculate global start date for temporal alignment across all charts
+        calculateGlobalStartDate();
+        
         return seriesData;
     } catch (error) {
         console.error('Error loading series data:', error);
         showError('Failed to load economic data. Please ensure the viz command has been run.');
         return null;
+    }
+}
+
+// Calculate the global start date across all series for temporal alignment
+function calculateGlobalStartDate() {
+    if (!seriesData) return;
+    
+    const allSeriesIds = Object.keys(seriesData);
+    const allStartDates = [];
+    
+    allSeriesIds.forEach(seriesId => {
+        const series = seriesData[seriesId];
+        if (series && series.Series && series.Series.Obs && series.Series.Obs.length > 0) {
+            // Find first valid observation
+            for (let obs of series.Series.Obs) {
+                if (obs.value !== 'NaN' && obs.value !== null && obs.value !== undefined) {
+                    const value = parseFloat(obs.value);
+                    if (!isNaN(value)) {
+                        const dateStr = parseDate(obs.indexDateString);
+                        allStartDates.push(new Date(dateStr + '-01')); // Convert YYYY-MM to Date
+                        break;
+                    }
+                }
+            }
+        }
+    });
+    
+    if (allStartDates.length > 0) {
+        // Find the latest (most recent) starting date
+        globalStartDate = new Date(Math.max(...allStartDates));
+        const globalStartStr = globalStartDate.getFullYear() + '-' + 
+                              String(globalStartDate.getMonth() + 1).padStart(2, '0');
+        console.log(`Global temporal alignment: All charts will start from ${globalStartStr}`);
+        console.log(`Found ${allStartDates.length} series with date ranges`);
     }
 }
 
@@ -144,8 +182,8 @@ function parseDate(dateString) {
     return `${year}-${month.padStart(2, '0')}`;
 }
 
-// Helper function to extract data from series, handling NaN values
-function extractSeriesData(seriesId) {
+// Helper function to extract data from series, handling NaN values and applying global temporal alignment
+function extractSeriesData(seriesId, applyGlobalAlignment = false) {
     if (!seriesData || !seriesData[seriesId]) {
         console.error(`Series ${seriesId} not found`);
         return { data: [], labels: [] };
@@ -159,8 +197,19 @@ function extractSeriesData(seriesId) {
         if (obs.value !== 'NaN' && obs.value !== null && obs.value !== undefined) {
             const value = parseFloat(obs.value);
             if (!isNaN(value)) {
-                result.push(value);
-                labels.push(parseDate(obs.indexDateString));
+                const dateStr = parseDate(obs.indexDateString);
+                
+                // Apply global temporal alignment if enabled
+                if (applyGlobalAlignment && globalStartDate) {
+                    const obsDate = new Date(dateStr + '-01');
+                    if (obsDate >= globalStartDate) {
+                        result.push(value);
+                        labels.push(dateStr);
+                    }
+                } else {
+                    result.push(value);
+                    labels.push(dateStr);
+                }
             }
         }
     });
@@ -272,13 +321,38 @@ function createUnemploymentChart() {
     
     console.log(`Imacec rate calculated points: ${imacecRateData.length}`);
     
-    // Align all datasets temporally
-    const alignedData = alignTemporalData(
-        nationalUnemployment,
-        antofagastaUnemployment, 
-        nubleUnemployment,
-        imacecRateDataset
-    );
+    // Use global temporal alignment for consistent cross-chart comparison
+    // All data will be filtered to start from the globalStartDate
+    const nationalAligned = extractSeriesData('F049.DES.TAS.INE9.10.M', true);
+    const antofagastaAligned = extractSeriesData('F049.DES.TAS.INE9.12.M', true);
+    const nubleAligned = extractSeriesData('F049.DES.TAS.INE9.26.M', true);
+    
+    // Apply global alignment to calculated Imacec rate data
+    let imacecAlignedData = [];
+    let imacecAlignedLabels = [];
+    if (globalStartDate) {
+        for (let i = 0; i < imacecRateData.length; i++) {
+            const dateStr = imacecLabels[i];
+            const obsDate = new Date(dateStr + '-01');
+            if (obsDate >= globalStartDate) {
+                imacecAlignedData.push(imacecRateData[i]);
+                imacecAlignedLabels.push(dateStr);
+            }
+        }
+    } else {
+        imacecAlignedData = imacecRateData;
+        imacecAlignedLabels = imacecLabels;
+    }
+    
+    // Create aligned data structure for consistency
+    const alignedData = {
+        labels: nationalAligned.labels, // They should all have the same temporal range now
+        alignedData: [
+            nationalAligned.data,
+            antofagastaAligned.data,
+            nubleAligned.data
+        ]
+    };
     
     if (alignedData.labels.length === 0) {
         console.error('No common dates found across unemployment and Imacec datasets');
@@ -305,12 +379,12 @@ function createUnemploymentChart() {
                     borderColor: colors.chartPrimary,
                     backgroundColor: 'transparent',
                     fill: false,
-                    borderWidth: 2,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
+                    pointHoverRadius: 3,
                     pointBackgroundColor: colors.chartPrimary,
-                    pointBorderColor: colors.background,
-                    pointBorderWidth: 2,
+                    pointBorderColor: colors.chartPrimary,
+                    pointBorderWidth: 1.5,
                     tension: 0
                 },
                 {
@@ -319,12 +393,12 @@ function createUnemploymentChart() {
                     borderColor: colors.chartSecondary,
                     backgroundColor: 'transparent',
                     fill: false,
-                    borderWidth: 2,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
+                    pointHoverRadius: 3,
                     pointBackgroundColor: colors.chartSecondary,
-                    pointBorderColor: colors.background,
-                    pointBorderWidth: 2,
+                    pointBorderColor: colors.chartSecondary,
+                    pointBorderWidth: 1.5,
                     tension: 0
                 },
                 {
@@ -333,12 +407,12 @@ function createUnemploymentChart() {
                     borderColor: colors.chartThird,
                     backgroundColor: 'transparent',
                     fill: false,
-                    borderWidth: 2,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
+                    pointHoverRadius: 3,
                     pointBackgroundColor: colors.chartThird,
-                    pointBorderColor: colors.background,
-                    pointBorderWidth: 2,
+                    pointBorderColor: colors.chartThird,
+                    pointBorderWidth: 1.5,
                     tension: 0
                 }
                 // Removed Imacec from this chart to avoid dual Y-axis issue
@@ -366,14 +440,14 @@ function createUnemploymentChart() {
                     title: {
                         display: true,
                         text: 'Date (Year-Month)',
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 12,
                             weight: '600'
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 10
                         },
@@ -395,14 +469,14 @@ function createUnemploymentChart() {
                     title: {
                         display: true,
                         text: 'Unemployment Rate (%)',
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 12,
                             weight: '600'
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 11
                         }
@@ -428,7 +502,11 @@ function createUnemploymentChart() {
     console.log('Unemployment chart created successfully');
     
     // Create separate Imacec chart to follow data-to-viz best practices (avoid dual Y-axis)
-    createImacecChart(imacecRateDataset);
+    const imacecAlignedDataset = {
+        data: imacecAlignedData,
+        labels: imacecAlignedLabels
+    };
+    createImacecChart(imacecAlignedDataset);
     
     } catch (error) {
         console.error('Error creating unemployment chart:', error);
@@ -459,13 +537,13 @@ function createImacecChart(imacecData) {
                     borderColor: colors.chartFourth,
                     backgroundColor: 'transparent',
                     fill: false,
-                    borderWidth: 2,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: colors.chartDanger,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    tension: 0.1
+                    pointHoverRadius: 3,
+                    pointBackgroundColor: colors.chartFourth,
+                    pointBorderColor: colors.chartFourth,
+                    pointBorderWidth: 1.5,
+                    tension: 0
                 }]
             },
             options: {
@@ -475,14 +553,14 @@ function createImacecChart(imacecData) {
                         title: {
                             display: true,
                             text: 'Date (Year-Month)',
-                            color: colors.darkNeutral,
+                            color: colors.textSecondary,
                             font: {
                                 size: 12,
                                 weight: '600'
                             }
                         },
                         ticks: {
-                            color: colors.darkNeutral,
+                            color: colors.textSecondary,
                             font: {
                                 size: 10
                             },
@@ -501,14 +579,14 @@ function createImacecChart(imacecData) {
                         title: {
                             display: true,
                             text: 'Year-over-Year Change (%)',
-                            color: colors.darkNeutral,
+                            color: colors.textSecondary,
                             font: {
                                 size: 12,
                                 weight: '600'
                             }
                         },
                         ticks: {
-                            color: colors.darkNeutral,
+                            color: colors.textSecondary,
                             font: {
                                 size: 11
                             }
@@ -546,14 +624,14 @@ function createExchangeChart() {
         }
         const ctx = canvas.getContext('2d');
         
-        // Extract data
-        const exchangeRateData = extractSeriesData('F073.TCO.PRE.Z.D');
-        const copperPriceData = extractSeriesData('F019.PPB.PRE.100.D');
+        // Extract data with global temporal alignment
+        const exchangeRateData = extractSeriesData('F073.TCO.PRE.Z.D', true);
+        const copperPriceData = extractSeriesData('F019.PPB.PRE.100.D', true);
         
         // Verify data extraction
         console.log(`Exchange rate data points: ${exchangeRateData.data.length}, Copper price data points: ${copperPriceData.data.length}`);
         
-        // Align datasets temporally to handle different start dates
+        // Align datasets temporally within the globally aligned timeframe
         const alignedData = alignTemporalDataLegacy(exchangeRateData, copperPriceData);
         
         if (alignedData.labels.length === 0) {
@@ -574,27 +652,27 @@ function createExchangeChart() {
                     data: alignedData.dataset1,
                     borderColor: colors.chartPrimary,
                     backgroundColor: 'transparent',
-                    borderWidth: 2.5,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 5,
+                    pointHoverRadius: 3,
                     pointBackgroundColor: colors.chartPrimary,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    tension: 0.1
+                    pointBorderColor: colors.chartPrimary,
+                    pointBorderWidth: 1.5,
+                    tension: 0
                 },
                 {
                     label: 'Copper Price (USD/lb)',
                     data: alignedData.dataset2,
-                    borderColor: colors.chartDanger,
+                    borderColor: colors.chartSecondary,
                     backgroundColor: 'transparent',
                     yAxisID: 'y1',
-                    borderWidth: 2.5,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: colors.chartDanger,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    tension: 0.1
+                    pointHoverRadius: 3,
+                    pointBackgroundColor: colors.chartSecondary,
+                    pointBorderColor: colors.chartSecondary,
+                    pointBorderWidth: 1.5,
+                    tension: 0
                 }
             ]
         },
@@ -611,7 +689,7 @@ function createExchangeChart() {
                     title: {
                         display: true,
                         text: 'Date (Year-Month)',
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 13,
                             weight: '600',
@@ -619,7 +697,7 @@ function createExchangeChart() {
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 10,
                             weight: '500'
@@ -651,7 +729,7 @@ function createExchangeChart() {
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 11,
                             weight: '500'
@@ -674,7 +752,7 @@ function createExchangeChart() {
                     title: {
                         display: true,
                         text: 'Copper Price (USD/lb)',
-                        color: colors.chartDanger,
+                        color: colors.chartSecondary,
                         font: {
                             size: 13,
                             weight: '600',
@@ -682,7 +760,7 @@ function createExchangeChart() {
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 11,
                             weight: '500'
@@ -723,15 +801,15 @@ function createCPIChart() {
     }
     const ctx = canvas.getContext('2d');
     
-    // Extract data
-    const chileIPCData = extractSeriesData('F074.IPC.VAR.Z.Z.C.M');
-    const usaIPCData = extractSeriesData('F019.IPC.V12.10.M');
+    // Extract data with global temporal alignment
+    const chileIPCData = extractSeriesData('F074.IPC.VAR.Z.Z.C.M', true);
+    const usaIPCData = extractSeriesData('F019.IPC.V12.10.M', true);
     
     // Verify data extraction
     console.log(`Chile IPC data points: ${chileIPCData.data.length}`);
     console.log(`USA IPC data points: ${usaIPCData.data.length}`);
     
-    // Align datasets temporally to handle different start dates
+    // Align datasets temporally within the globally aligned timeframe
     const alignedData = alignTemporalDataLegacy(chileIPCData, usaIPCData);
     
     if (alignedData.labels.length === 0) {
@@ -756,28 +834,28 @@ function createCPIChart() {
                     label: 'CPI Chile (Monthly Variation %)',
                     data: alignedData.dataset1,
                     borderColor: colors.chartPrimary,
-                    backgroundColor: colors.chartPrimary + '15',
-                    fill: true,
-                    borderWidth: 2.5,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
+                    pointHoverRadius: 3,
                     pointBackgroundColor: colors.chartPrimary,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    tension: 0.1
+                    pointBorderColor: colors.chartPrimary,
+                    pointBorderWidth: 1.5,
+                    tension: 0
                 },
                 {
                     label: 'CPI USA (12-month Variation %)',
                     data: alignedData.dataset2,
-                    borderColor: colors.chartDanger,
+                    borderColor: colors.chartSecondary,
                     backgroundColor: 'transparent',
-                    borderWidth: 2.5,
+                    borderWidth: 1.5,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
-                    pointBackgroundColor: colors.chartDanger,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    tension: 0.1
+                    pointHoverRadius: 3,
+                    pointBackgroundColor: colors.chartSecondary,
+                    pointBorderColor: colors.chartSecondary,
+                    pointBorderWidth: 1.5,
+                    tension: 0
                 }
             ]
         },
@@ -794,7 +872,7 @@ function createCPIChart() {
                     title: {
                         display: true,
                         text: 'Date (Year-Month)',
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 13,
                             weight: '600',
@@ -802,7 +880,7 @@ function createCPIChart() {
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 10,
                             weight: '500'
@@ -831,7 +909,7 @@ function createCPIChart() {
                         }
                     },
                     ticks: {
-                        color: colors.darkNeutral,
+                        color: colors.textSecondary,
                         font: {
                             size: 11,
                             weight: '500'

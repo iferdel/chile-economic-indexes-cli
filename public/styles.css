@@ -58,10 +58,10 @@ header {
 }
 
 header h1 {
-    font-size: 32px;
+    font-size: 28px;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 header p {
@@ -87,10 +87,10 @@ header p {
 }
 
 .chart-header h2 {
-    font-size: 22px;
+    font-size: 18px;
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .chart-description {
@@ -102,10 +102,10 @@ header p {
 
 .chart-wrapper {
     position: relative;
-    height: 450px;
+    height: 400px;
     background: var(--background);
     border: 1px solid var(--border-light);
-    padding: var(--space-md);
+    padding: var(--space-sm);
 }
 
 /* Chart canvas responsiveness */
@@ -165,10 +165,10 @@ footer p {
     font-size: 15px;
     color: var(--text-secondary);
     line-height: 1.6;
-    background: #fafafa;
+    background: var(--background);
 }
 
 .data-info strong {
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: 500;
 }
