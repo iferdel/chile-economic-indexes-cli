@@ -57,6 +57,37 @@ function extractSeriesData(seriesId) {
     return { data: result, labels: labels };
 }
 
+// Helper function to align two time series datasets with different temporal ranges
+function alignTemporalData(dataset1, dataset2) {
+    const data1Map = new Map();
+    const data2Map = new Map();
+    
+    // Create maps for fast lookup by date
+    dataset1.labels.forEach((label, index) => {
+        data1Map.set(label, dataset1.data[index]);
+    });
+    
+    dataset2.labels.forEach((label, index) => {
+        data2Map.set(label, dataset2.data[index]);
+    });
+    
+    // Find the intersection of dates (common time period)
+    const commonDates = [...data1Map.keys()].filter(date => data2Map.has(date));
+    commonDates.sort(); // Ensure chronological order
+    
+    // Extract aligned data for the common time period
+    const alignedData1 = commonDates.map(date => data1Map.get(date));
+    const alignedData2 = commonDates.map(date => data2Map.get(date));
+    
+    console.log(`Temporal alignment: ${commonDates.length} common dates from ${commonDates[0]} to ${commonDates[commonDates.length-1]}`);
+    
+    return {
+        labels: commonDates,
+        dataset1: alignedData1,
+        dataset2: alignedData2
+    };
+}
+
 // Helper function to show error messages
 function showError(message) {
     const containers = document.querySelectorAll('.chart-wrapper');
@@ -206,42 +237,54 @@ function createUnemploymentChart() {
 
 // Create exchange rate vs copper price chart
 function createExchangeChart() {
-    const canvas = document.getElementById('exchangeChart');
-    if (!canvas) {
-        console.error('Canvas element not found: exchangeChart');
-        return;
-    }
-    const ctx = canvas.getContext('2d');
-    
-    // Extract data
-    const exchangeRateData = extractSeriesData('F073.TCO.PRE.Z.D');
-    const copperPriceData = extractSeriesData('F019.PPB.PRE.100.D');
-    
-    // Use the exchange rate labels as the base
-    const labels = exchangeRateData.labels;
-    
-    const config = {
+    try {
+        const canvas = document.getElementById('exchangeChart');
+        if (!canvas) {
+            console.error('Canvas element not found: exchangeChart');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        
+        // Extract data
+        const exchangeRateData = extractSeriesData('F073.TCO.PRE.Z.D');
+        const copperPriceData = extractSeriesData('F019.PPB.PRE.100.D');
+        
+        // Verify data extraction
+        console.log(`Exchange rate data points: ${exchangeRateData.data.length}, Copper price data points: ${copperPriceData.data.length}`);
+        
+        // Align datasets temporally to handle different start dates
+        const alignedData = alignTemporalData(exchangeRateData, copperPriceData);
+        
+        if (alignedData.labels.length === 0) {
+            console.error('No common dates found between exchange rate and copper price data');
+            document.querySelector('.chart-wrapper').innerHTML = '<div class="error-message">No overlapping data found between USD exchange rate and copper price series</div>';
+            return;
+        }
+        
+        console.log(`Exchange chart alignment: ${alignedData.labels.length} common data points from ${alignedData.labels[0]} to ${alignedData.labels[alignedData.labels.length-1]}`);
+        
+        const config = {
         type: 'line',
         data: {
-            labels: labels,
+            labels: alignedData.labels,
             datasets: [
                 {
                     label: 'USD to CLP Exchange Rate',
-                    data: exchangeRateData.data,
+                    data: alignedData.dataset1,
                     borderColor: colors.skyblue,
                     backgroundColor: 'transparent',
                     yAxisID: 'y',
                     tension: 0.1,
-                    pointRadius: 1
+                    pointRadius: 0.5
                 },
                 {
                     label: 'Copper Price (USD/lb)',
-                    data: copperPriceData.data,
+                    data: alignedData.dataset2,
                     borderColor: colors.red,
                     backgroundColor: 'transparent',
                     yAxisID: 'y1',
                     tension: 0.1,
-                    pointRadius: 1
+                    pointRadius: 0.5
                 }
             ]
         },
@@ -309,6 +352,15 @@ function createExchangeChart() {
     };
     
     new Chart(ctx, config);
+    console.log('Exchange rate chart created successfully');
+    
+    } catch (error) {
+        console.error('Error creating exchange rate chart:', error);
+        const wrapper = document.querySelector('#exchangeChart').closest('.chart-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = '<div class="error-message">Error creating exchange rate chart: ' + error.message + '</div>';
+        }
+    }
 }
 
 // Create CPI comparison chart
