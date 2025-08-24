@@ -36,9 +36,10 @@ var AvailableSetsSeries = map[string]Set{
 			"F019.IPC.V12.10.M",
 			"F019.PPB.PRE.100.D",
 			"F073.TCO.PRE.Z.D",
-			"F049.DES.TAS.INE9.10.M",
-			"F049.DES.TAS.INE9.26.M",
-			"F049.DES.TAS.INE9.12.M",
+			"F049.DES.TAS.INE.10.M",  // Tasa de desocupación, total | Ajustada estacionalmente | INE | Mensual | Porcentaje
+			"F049.DES.TAS.INE9.26.M", // Tasa de desocupación, Región del Ñuble, mensual INE
+			"F049.DES.TAS.INE9.12.M", // Tasa de desocupación, Región de Antofagasta, mensual INE
+			// sankey chart with x axis time (year, month) and in y axis the % of man and woman (adding both to 100%) and see its fluctuation over the years
 		},
 	},
 }

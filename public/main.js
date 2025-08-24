@@ -290,7 +290,7 @@ function createUnemploymentChart() {
     const ctx = canvas.getContext('2d');
     
     // Extract data for unemployment series
-    const nationalUnemployment = extractSeriesData('F049.DES.TAS.INE9.10.M');
+    const nationalUnemployment = extractSeriesData('F049.DES.TAS.INE.10.M');
     const antofagastaUnemployment = extractSeriesData('F049.DES.TAS.INE9.12.M');
     const nubleUnemployment = extractSeriesData('F049.DES.TAS.INE9.26.M');
     const imacecData = extractSeriesData('F032.IMC.IND.Z.Z.EP18.Z.Z.1.M');
@@ -323,7 +323,7 @@ function createUnemploymentChart() {
     
     // Use global temporal alignment for consistent cross-chart comparison
     // All data will be filtered to start from the globalStartDate
-    const nationalAligned = extractSeriesData('F049.DES.TAS.INE9.10.M', true);
+    const nationalAligned = extractSeriesData('F049.DES.TAS.INE.10.M', true);
     const antofagastaAligned = extractSeriesData('F049.DES.TAS.INE9.12.M', true);
     const nubleAligned = extractSeriesData('F049.DES.TAS.INE9.26.M', true);
     
@@ -995,7 +995,7 @@ function createUnemploymentImacecChart() {
         const ctx = canvas.getContext('2d');
         
         // Extract data for unemployment series
-        const nationalUnemployment = extractSeriesData('F049.DES.TAS.INE9.10.M');
+        const nationalUnemployment = extractSeriesData('F049.DES.TAS.INE.10.M');
         const antofagastaUnemployment = extractSeriesData('F049.DES.TAS.INE9.12.M');
         const nubleUnemployment = extractSeriesData('F049.DES.TAS.INE9.26.M');
         const imacecData = extractSeriesData('F032.IMC.IND.Z.Z.EP18.Z.Z.1.M');
@@ -1013,7 +1013,7 @@ function createUnemploymentImacecChart() {
         }
         
         // Use global temporal alignment
-        const nationalAligned = extractSeriesData('F049.DES.TAS.INE9.10.M', true);
+        const nationalAligned = extractSeriesData('F049.DES.TAS.INE.10.M', true);
         const antofagastaAligned = extractSeriesData('F049.DES.TAS.INE9.12.M', true);
         const nubleAligned = extractSeriesData('F049.DES.TAS.INE9.26.M', true);
         
