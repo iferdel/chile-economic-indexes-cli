@@ -15,7 +15,7 @@ var searchCmd = &cobra.Command{
 	Long:  `Every data series has their own ID which may be used on get command to retrieve its data.`,
 	Run: withSpinnerWrapper(cfg.spinner, func(cmd *cobra.Command, args []string) {
 		predefinedSetsFlag, _ := cmd.Flags().GetBool("predefined-sets")
-		
+
 		if predefinedSetsFlag {
 			fmt.Println("Available predefined sets for visualization:")
 			setNames := slices.Sorted(maps.Keys(AvailableSetsSeries))
@@ -37,6 +37,7 @@ var searchCmd = &cobra.Command{
 		}
 
 		frequencyFlag, _ := cmd.Flags().GetString("frequency")
+		frequencyFlag = strings.ToUpper(frequencyFlag)
 		keywordFlag, _ := cmd.Flags().GetString("keyword")
 
 		validFrequencies := []string{"DAILY", "MONTHLY", "QUARTERLY", "ANNUAL"}
