@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	cfg config
+	cfg     config
+	version string
 )
 
 const (
@@ -93,6 +94,12 @@ var rootCmd = &cobra.Command{
 	Long: `This CLI tool allows you to set credentials and search for available data series from the Banco Central de Chile API. 
 It allows the use of keywords to filter the whole list of available data series. 
 Every data series has their own ID which may be used on get command to retrieve its data.`,
+}
+
+// SetVersion sets the version for the CLI
+func SetVersion(v string) {
+	version = v
+	rootCmd.Version = v
 }
 
 // Execute executes the root command.

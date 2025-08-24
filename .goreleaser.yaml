@@ -1,0 +1,23 @@
+version: 2
+
+project_name: bcch-cli
+
+builds:
+  - main: ./bcch
+    binary: bcch
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+gomod:
+  proxy: true
+
+checksum:
+  name_template: "checksums.txt"
+
