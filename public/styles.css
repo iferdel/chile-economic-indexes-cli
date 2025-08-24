@@ -1,17 +1,25 @@
 /* Clean, Minimal Design Following data-to-viz.com Principles */
 :root {
-    /* Simplified Colors - Minimal Palette */
-    --text-primary: #333333;
+    /* Brand Colors - Following Design Principles */
+    --brand-primary: #69B3A2;    /* Primary brand color */
+    --brand-secondary: #251667;  /* Dark accent */
+    --brand-highlight: #FED136;  /* Warm accent/highlight */
+    --dark-neutral: #212529;     /* Dark backgrounds */
+    --light-neutral: #E9ECEF;    /* Light borders */
+    --very-light-neutral: #F2F2F2; /* Very light backgrounds */
+    
+    /* Text Colors */
+    --text-primary: #212529;
     --text-secondary: #666666;
     --text-light: #999999;
     --background: #ffffff;
-    --border-light: #e0e0e0;
+    --border-light: #E9ECEF;
     --border-medium: #cccccc;
     
-    /* Chart Colors - Simple, Clean Palette */
-    --chart-primary: #2166ac;
-    --chart-secondary: #762a83;
-    --chart-third: #5aae61;
+    /* Chart Colors - Using brand palette */
+    --chart-primary: #69B3A2;
+    --chart-secondary: #251667;
+    --chart-third: #FED136;
     --chart-fourth: #d6604d;
     --chart-fifth: #f4a582;
     
@@ -59,9 +67,9 @@ header {
 
 header h1 {
     font-size: 28px;
-    color: var(--text-primary);
+    color: var(--brand-secondary);
     margin-bottom: var(--space-md);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 header p {
@@ -88,9 +96,9 @@ header p {
 
 .chart-header h2 {
     font-size: 18px;
-    color: var(--text-primary);
+    color: var(--brand-secondary);
     margin-bottom: var(--space-sm);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .chart-description {
@@ -105,7 +113,9 @@ header p {
     height: 400px;
     background: var(--background);
     border: 1px solid var(--border-light);
+    border-radius: 8px;
     padding: var(--space-sm);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* Chart canvas responsiveness */
@@ -160,12 +170,14 @@ footer p {
 /* Simple Data Info Panel */
 .data-info {
     border: 1px solid var(--border-light);
+    border-left: 4px solid var(--brand-primary);
     padding: var(--space-lg);
     margin-bottom: var(--space-xl);
     font-size: 15px;
     color: var(--text-secondary);
     line-height: 1.6;
-    background: var(--background);
+    background: var(--very-light-neutral);
+    border-radius: 4px;
 }
 
 .data-info strong {

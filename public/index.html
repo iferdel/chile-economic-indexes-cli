@@ -26,59 +26,45 @@
                 <strong>currency exchange rates</strong>, and <strong>inflation comparisons</strong> across different regions and time periods.
             </div>
 
-            <!-- Regional Unemployment Rates Chart -->
+            <!-- Chart 1: Unemployment + Imacec (Following notebook structure) -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h2>Regional Unemployment Rates Comparison</h2>
+                    <h2>Annual Unemployment Rate & Monthly Index of Economic Activity (Imacec)</h2>
                     <p class="chart-description">
-                        Unemployment rates across Chile: national average and regional variations in Antofagasta and Ñuble.
-                        Following data-to-viz.com best practices with single Y-axis for accurate comparison.
+                        Unemployment rates nationally and in Antofagasta and Ñuble regions, combined with Imacec rate.
+                        Replicating the visualization from the economic indicators analysis notebook.
                     </p>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="unemploymentChart"></canvas>
+                    <canvas id="unemploymentImacecChart"></canvas>
                 </div>
             </div>
             
-            <!-- Economic Activity Index (Imacec) Chart -->
+            <!-- Chart 2: Exchange Rate + Copper Price (Following notebook structure) -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h2>Monthly Index of Economic Activity (Imacec)</h2>
-                    <p class="chart-description">
-                        Year-over-year change in Chile's Monthly Index of Economic Activity (Imacec). 
-                        Separated from unemployment data to follow data visualization best practices against dual Y-axes.
-                    </p>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="imacecChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Exchange Rate vs Copper Price Chart -->
-            <div class="chart-container">
-                <div class="chart-header">
-                    <h2>USD Exchange Rate & Copper Price</h2>
+                    <h2>Chilean Currency Exchange Rate & Copper Value</h2>
                     <p class="chart-description">
                         Chilean currency exchange rate per USD and copper value (USD/lb). 
-                        Demonstrates the relationship between currency valuation and Chile's main export commodity.
+                        Following the notebook's dual Y-axis approach to show currency-commodity relationship.
                     </p>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="exchangeChart"></canvas>
+                    <canvas id="exchangeCopperChart"></canvas>
                 </div>
             </div>
 
-            <!-- Consumer Price Index Chart -->
+            <!-- Chart 3: CPI Comparison (Following notebook structure) -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h2>Consumer Price Index (CPI) Comparison</h2>
+                    <h2>Consumer Price Index Comparison: Chile vs USA</h2>
                     <p class="chart-description">
                         Consumer Price Index comparison between Chile and United States.
                         Shows inflation trends and comparative price level changes between both economies.
                     </p>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="cpiChart"></canvas>
+                    <canvas id="cpiComparisonChart"></canvas>
                 </div>
             </div>
         </main>
