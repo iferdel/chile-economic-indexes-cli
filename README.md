@@ -3,7 +3,7 @@
 ![ci test badge](https://github.com/iferdel/chile-economic-indexes-cli/actions/workflows/tests.yml/badge.svg?event=pull_request)
 
 ## General Description
-This CLI tool allows you to set credentials and search for available data series from the Banco Central de Chile API using keywords. Once the data series of interest are identified, you can use their IDs to retrieve the corresponding data.
+This CLI tool allows you to search, fetch and visualize available data series from the Banco Central de Chile API. Once the data series of interest are identified, you can use their IDs to retrieve the corresponding data in an isolated manner. Also, there are a bunch of predefined sets of series which are used for visualization purposes, starting a local file server that shows different trends or 'insights' from the data.
 
 More information about the API can be found at [BCCh API para Base de Datos Estadísticos](https://si3.bcentral.cl/Siete/es/Siete/API?respuesta=)
 
@@ -12,7 +12,7 @@ More information about the API can be found at [BCCh API para Base de Datos Esta
 ## Reason
 One of the beauties of Go is its robust and versatile standard library. I noticed a lack of Go-based implementations for the Banco Central de Chile API, and this inspired me to develop a CLI tool as an entry point. This tool provides an easy-to-use interface, acting as a wrapper over the API to simplify data retrieval and interaction. By doing so, I aimed to explore the abstraction ladder of existing CLI libraries, starting from the Go standard library.
 
-This CLI serves as a foundational project, offering an interactive and streamlined experience for users while also opening the door for future enhancements. It simplifies access to the data series, making it an ideal starting stone for developers looking to extend its capabilities or for anyone needing a convenient way to interact with the API.
+This CLI serves as a foundational project, offering an interactive and streamlined experience for users while also opening the door for future enhancements. It simplifies access to the data series, making it an ideal starting stone for developers looking to extend its capabilities or for anyone needing a convenient way to interact with the API. 
 
 ## Version Roadmap
 The first release (v1.x.x) will rely entirely on the Go standard library. Subsequent versions will incrementally incorporate external libraries.
@@ -43,7 +43,7 @@ The **BCCh CLI Tool** provides an interface for interacting with the Banco Centr
 Provide installation instructions here, such as:
 
 ```sh
-go install github.com/yourusername/bcch-cli
+go install github.com/iferdel/chile-economic-indexes-cli/bcch@latest
 ```
 
 Or any other relevant way to install the tool.
@@ -95,6 +95,9 @@ Search for monthly inflation data:
 
 ```bash
 bcch search -k "inflation" -f MONTHLY
+
+# more than one keyword
+bcch search -k "employment" -f ANNUAL -k "China"
 ```
 
 ### Retrieve Data from a Specific Series
@@ -104,6 +107,20 @@ Retrieve data using a series ID:
 ```bash
 bcch get -s "12345-inflation-monthly"
 ```
+
+### Start Local Server For Visualization Dashboard
+
+Launch a local web server with interactive economic indicators dashboard:
+
+```bash
+bcch viz
+```
+
+This opens a visualization dashboard showing real-time economic data from the BCCh API. The default EMPLOYMENT set includes unemployment trends, currency exchange rates, and inflation comparisons across different Chilean regions.
+
+**Note on AI-Assisted Development:** The chart generation, dashboard design, and static content creation for the visualization feature were developed with extensive Claude assistance. The approach leveraged [data-to-viz](https://www.data-to-viz.com/) as a foundational reference for incorporating chart best practices based on data type, common pitfalls, caveats, and visual styling guidelines. *The biggest goal of this idea was to start the creation of a 'personal' agent which would use this reference to polish charts when needed.* 
+
+![Chile Economic Indicators Dashboard - Employment Set](./assets/chile-economic-indicators-dashboard-EMPLOYMENT.png)
 
 ## Out of the Box Features
 - **Caching for repeated requests:** Reduce API load and improve performance by caching repeated requests.
