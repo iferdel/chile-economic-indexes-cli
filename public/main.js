@@ -1056,11 +1056,11 @@ function createUnemploymentImacecChart() {
                     {
                         label: 'Antofagasta Region (%)',
                         data: antofagastaAligned.data,
-                        borderColor: colors.chartSecondary + 'CC', // 80% opacity
+                        borderColor: colors.chartSecondary + 'BB', // 73% opacity
                         backgroundColor: 'transparent',
                         fill: false,
                         borderWidth: 1.5,
-                        borderDash: [5, 5],
+                        borderDash: [8, 4], // Longer, more elegant dashes
                         pointRadius: 0,
                         pointHoverRadius: 4,
                         pointBackgroundColor: colors.chartSecondary,
@@ -1071,11 +1071,11 @@ function createUnemploymentImacecChart() {
                     {
                         label: 'Ñuble Region (%)',
                         data: nubleAligned.data,
-                        borderColor: colors.chartThird + 'CC', // 80% opacity
+                        borderColor: colors.chartThird + 'BB', // 73% opacity
                         backgroundColor: 'transparent',
                         fill: false,
                         borderWidth: 1.5,
-                        borderDash: [3, 3],
+                        borderDash: [2, 2], // Subtle dotted pattern
                         pointRadius: 0,
                         pointHoverRadius: 4,
                         pointBackgroundColor: colors.chartThird,

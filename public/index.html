@@ -14,25 +14,22 @@
     <div class="container">
         <header>
             <h1>Chile Economic Indicators Dashboard</h1>
-            <p>Professional economic data visualization following data-to-viz.com best practices (2010-2025)</p>
             <p class="data-source">Data source: Banco Central de Chile (BCCh)</p>
         </header>
 
         <main>
-            <!-- Data Overview Panel -->
             <div class="data-info">
                 <strong>Chilean Economic Dashboard</strong> - Real-time visualization of key economic indicators from Banco Central de Chile (BCCh). 
                 Data is automatically updated and covers the period from 2010 to present, showing <strong>unemployment trends</strong>, 
                 <strong>currency exchange rates</strong>, and <strong>inflation comparisons</strong> across different regions and time periods.
             </div>
 
-            <!-- Chart 1: Unemployment + Imacec (Following notebook structure) -->
+            <!-- Chart 1: Unemployment + Imacec -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h2>Annual Unemployment Rate & Monthly Index of Economic Activity (Imacec)</h2>
+                    <h2>Unemployment Rate & Monthly Index of Economic Activity (Imacec)</h2>
                     <p class="chart-description">
-                        Unemployment rates nationally and in Antofagasta and Ñuble regions, combined with Imacec rate.
-                        Replicating the visualization from the economic indicators analysis notebook.
+                        National unemployment trends compared with two contrasting regional economies: <strong>Antofagasta</strong> (Chile's largest mining region, contributing 72% of regional GDP and 18.4% of national mining employment) and <strong>Ñuble</strong> (Chile's most rural region, with 30.6% rural population). The dual Y-axis includes Chile's Monthly Index of Economic Activity (Imacec) to reveal how economic cycles affect employment across different economic structures.
                     </p>
                 </div>
                 <div class="chart-wrapper">
@@ -40,28 +37,20 @@
                 </div>
             </div>
             
-            <!-- Chart 2: Exchange Rate + Copper Price (Following notebook structure) -->
+            <!-- Chart 2: Exchange Rate + Copper Price -->
             <div class="chart-container">
                 <div class="chart-header">
                     <h2>Chilean Currency Exchange Rate & Copper Value</h2>
-                    <p class="chart-description">
-                        Chilean currency exchange rate per USD and copper value (USD/lb). 
-                        Following the notebook's dual Y-axis approach to show currency-commodity relationship.
-                    </p>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="exchangeCopperChart"></canvas>
                 </div>
             </div>
 
-            <!-- Chart 3: CPI Comparison (Following notebook structure) -->
+            <!-- Chart 3: CPI Comparison -->
             <div class="chart-container">
                 <div class="chart-header">
                     <h2>Consumer Price Index Comparison: Chile vs USA</h2>
-                    <p class="chart-description">
-                        Consumer Price Index comparison between Chile and United States.
-                        Shows inflation trends and comparative price level changes between both economies.
-                    </p>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="cpiComparisonChart"></canvas>
