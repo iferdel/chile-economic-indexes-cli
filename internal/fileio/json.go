@@ -2,11 +2,20 @@ package fileio
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func SaveSeriesToJSON(payload any, filename string) error {
-	file, err := os.Create(filename)
+	// Validate filename to prevent path traversal
+	cleanPath := filepath.Clean(filename)
+	if strings.Contains(cleanPath, "..") || filepath.IsAbs(cleanPath) {
+		return errors.New("invalid filename: path traversal or absolute path not allowed")
+	}
+	
+	file, err := os.Create(cleanPath)
 	if err != nil {
 		return err
 	}

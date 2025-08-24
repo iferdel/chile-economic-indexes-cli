@@ -110,9 +110,18 @@ func StartVizServer(publicDir, port string) error {
 	url := "http://localhost:" + port + "/"
 	go func() {
 		time.Sleep(2 * time.Second)
-		browser.OpenURL(url)
+		if err := browser.OpenURL(url); err != nil {
+			log.Printf("Warning: Could not open browser automatically: %v", err)
+		}
 	}()
 
 	log.Printf("Serving series visualization at %s -- Ctrl+C to stop", url)
-	return http.ListenAndServe(":"+port, nil)
+	
+	server := &http.Server{
+		Addr:         ":" + port,
+		Handler:      nil,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	return server.ListenAndServe()
 }

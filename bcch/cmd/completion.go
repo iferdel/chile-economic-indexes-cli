@@ -9,15 +9,19 @@ var completionCmd = &cobra.Command{
 	Args:      cobra.ExactArgs(1),
 	ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error
 		switch args[0] {
 		case "bash":
-			rootCmd.GenBashCompletion(cmd.OutOrStdout())
+			err = rootCmd.GenBashCompletion(cmd.OutOrStdout())
 		case "zsh":
-			rootCmd.GenZshCompletion(cmd.OutOrStdout())
+			err = rootCmd.GenZshCompletion(cmd.OutOrStdout())
 		case "fish":
-			rootCmd.GenFishCompletion(cmd.OutOrStdout(), true)
+			err = rootCmd.GenFishCompletion(cmd.OutOrStdout(), true)
 		case "powershell":
-			rootCmd.GenPowerShellCompletionWithDesc(cmd.OutOrStdout())
+			err = rootCmd.GenPowerShellCompletionWithDesc(cmd.OutOrStdout())
+		}
+		if err != nil {
+			cmd.PrintErrf("Error generating completion script: %v\n", err)
 		}
 	},
 }
