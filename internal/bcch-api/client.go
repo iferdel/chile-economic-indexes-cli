@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	bcchcache "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-cache"
+	bcchcache "github.com/iferdel/chile-economic-indexes-cli/v3/internal/bcch-cache"
 )
 
 type Client struct {

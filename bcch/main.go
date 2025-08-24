@@ -1,6 +1,6 @@
 package main
 
-import "github.com/iferdel/chile-economic-indexes-cli/bcch/cmd"
+import "github.com/iferdel/chile-economic-indexes-cli/v3/bcch/cmd"
 
 var version = "dev"
 

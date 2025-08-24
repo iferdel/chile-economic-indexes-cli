@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	bcchapi "github.com/iferdel/chile-economic-indexes-cli/internal/bcch-api"
-	"github.com/iferdel/chile-economic-indexes-cli/internal/fileio"
+	bcchapi "github.com/iferdel/chile-economic-indexes-cli/v3/internal/bcch-api"
+	"github.com/iferdel/chile-economic-indexes-cli/v3/internal/fileio"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )
@@ -116,7 +116,7 @@ func StartVizServer(publicDir, port string) error {
 	}()
 
 	log.Printf("Serving series visualization at %s -- Ctrl+C to stop", url)
-	
+
 	server := &http.Server{
 		Addr:         ":" + port,
 		Handler:      nil,

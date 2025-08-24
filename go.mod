@@ -1,4 +1,4 @@
-module github.com/iferdel/chile-economic-indexes-cli
+module github.com/iferdel/chile-economic-indexes-cli/v3
 
 go 1.23.4
 
