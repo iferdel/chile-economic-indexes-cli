@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -14,10 +15,12 @@ type FetchOptions struct {
 
 func (c *Client) GetAvailableSeries(seriesFrequency string) (AvailableSeriesResp, error) {
 
+	sf := strings.ToUpper(seriesFrequency)
+
 	endpoint := fmt.Sprintf("SieteRestWS.ashx?user=%s&pass=%s&function=SearchSeries&frequency=%s",
 		c.AuthConfig.User,
 		c.AuthConfig.Password,
-		seriesFrequency,
+		sf,
 	)
 	fullURL := baseURL + endpoint
 
