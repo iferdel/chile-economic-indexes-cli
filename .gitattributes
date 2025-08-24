@@ -1,0 +1,5 @@
+*.go linguist-language=Go
+
+# Ignore frontend assets and mark them as vendored
+*.zsh linguist-vendored
+*.bash linguist-vendored
