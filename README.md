@@ -3,7 +3,7 @@
 ![ci test badge](https://github.com/iferdel/chile-economic-indexes-cli/actions/workflows/tests.yml/badge.svg?event=pull_request)
 
 ## General Description
-This CLI tool allows you to search, fetch and visualize available data series from the Banco Central de Chile API. Once the data series of interest are identified, you can use their IDs to retrieve the corresponding data in an isolated manner. Also, there are a bunch of predefined sets of series which are used for visualization purposes, starting a local file server that shows different trends or 'insights' from the data.
+This CLI tool allows you to search, fetch and visualize available data series from the Banco Central de Chile API. Once the data series of interest are identified, you can use their IDs to retrieve the corresponding data in an isolated manner. Also, there are a bunch of predefined sets of series which are used for visualization purposes, starting a local web server with both static file serving and API endpoints that shows different trends or 'insights' from the data.
 
 More information about the API can be found at [BCCh API para Base de Datos Estadísticos](https://si3.bcentral.cl/Siete/es/Siete/API?respuesta=)
 
@@ -71,7 +71,7 @@ Retrieve data from a specific data series by series ID.
 - `-s`, `--series` - Specify the series ID to retrieve data from
 
 #### `viz`
-Opens a local webserver which shows visualizations for a specific set of series from BCCh API.
+Starts a local web server with static file serving and API endpoints to show visualizations for a specific set of series from BCCh API. The dashboard fetches data dynamically via REST API calls.
 - `--set` - Specify which set of series to use for visualization (default: EMPLOYMENT)
 - `-p`, `--port` - Specify port for the local web server (default: 49966)
 
@@ -116,7 +116,7 @@ Launch a local web server with interactive economic indicators dashboard:
 bcch viz
 ```
 
-This opens a visualization dashboard showing real-time economic data from the BCCh API. The default EMPLOYMENT set includes unemployment trends, currency exchange rates, and inflation comparisons across different Chilean regions.
+This starts a hybrid server that serves static files (HTML, CSS, JS) and provides REST API endpoints (e.g., `/api/sets/employment`) for dynamic data fetching. The dashboard shows real-time economic data from the BCCh API. The default EMPLOYMENT set includes unemployment trends, currency exchange rates, and inflation comparisons across different Chilean regions.
 
 **Note on AI-Assisted Development:** The chart generation, dashboard design, and static content creation for the visualization feature were developed with extensive Claude assistance. The approach leveraged [data-to-viz](https://www.data-to-viz.com/) as a foundational reference for incorporating chart best practices based on data type, common pitfalls, caveats, and visual styling guidelines. *The biggest goal of this idea was to start the creation of a 'personal' agent which would use this reference to polish charts when needed.* 
 

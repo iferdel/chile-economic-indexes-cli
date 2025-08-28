@@ -137,14 +137,45 @@ footer p {
     color: var(--text-light);
 }
 
-/* Simple Loading State */
+/* Loading State with Spinner */
 .loading {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 300px;
     font-size: 16px;
     color: var(--text-secondary);
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-light);
+    border-top: 2px solid var(--brand-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--space-sm);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    font-size: 14px;
+    color: var(--chart-fourth);
+    text-align: center;
+    padding: var(--space-md);
+    border: 1px solid rgba(214, 96, 77, 0.2);
+    border-radius: 4px;
+    background: rgba(214, 96, 77, 0.05);
 }
 
 /* Responsive Design */

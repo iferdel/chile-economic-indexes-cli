@@ -124,9 +124,9 @@ const chartDefaults = {
 // Load and parse series data
 async function loadSeriesData() {
     try {
-        const response = await fetch('series.json');
+        const response = await fetch('/api/sets/EMPLOYMENT');
         const data = await response.json();
-        seriesData = data.EMPLOYMENT.seriesData;
+        seriesData = data.Set.EMPLOYMENT.seriesData;
         window.seriesData = seriesData; // Make it globally accessible for debugging
         console.log('Series data loaded successfully');
         console.log('Available series:', Object.keys(seriesData));
@@ -1371,10 +1371,10 @@ function createCPIComparisonChart() {
 async function initDashboard() {
     console.log('Initializing Chile Economic Indicators Dashboard...');
     
-    // Show loading state
+    // Show loading state with spinner
     const chartWrappers = document.querySelectorAll('.chart-wrapper');
     chartWrappers.forEach(wrapper => {
-        wrapper.innerHTML = '<div class="loading">Loading economic data</div>';
+        wrapper.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading economic data from BCCh API...</div>';
     });
     
     // Load data

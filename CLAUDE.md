@@ -33,7 +33,7 @@ This is a CLI tool for interacting with the Banco Central de Chile (BCCh) API, b
 - `search.go` - Search available data series with keyword/frequency filtering
 - `get.go` - Retrieve specific series data by ID
 - `setcredentials.go` - Store BCCh API credentials locally
-- `viz.go` - Fetch a data set (multiple series of data) into a `series.json` inside `public/` folder, after that it launches a local visualization server with browser integration so the user can visalize pre-defined graphs for that specific data set
+- `viz.go` - Launches a hybrid web server that serves static files (HTML, CSS, JS) from the `public/` folder and provides REST API endpoints (e.g., `/api/sets/{set}`) for dynamic data fetching. Includes browser integration to automatically open the visualization dashboard
 - `completion.go` - Shell completion support
 
 **API Client** (`internal/bcch-api/`):
@@ -59,10 +59,14 @@ The application includes predefined sets of economic indicators (defined in `bcc
 - `EMPLOYMENT` - Employment relation between different regions with 8 series IDs (
 
 ## Visual Development
-- Local HTTP server serving static visualization files
+- Hybrid HTTP server serving both static files and REST API endpoints
+- Static files: HTML, CSS, JS from `public/` directory (embedded in binary)
+- API endpoints: `/api/sets/{set}` for dynamic data fetching from BCCh
 - Automatic browser opening after 2-second delay
-- JSON data export for visualization consumption
 - Configurable port (default 49966)
+- Data flows: CLI → HTTP Server → API Endpoint → BCCh API → JSON Response → Frontend Charts
+
+**MUST** use the dev tool to disable cache and thus being able to see the changes whenever refreshing the page.
 
 -- Template for a python notebook with the plot of graphs that are of interest in regard of the *EMPLOYMENT* set https://github.com/iferdel-vault/chile-economic-indicators/blob/main/Chile_economic_indicators_project.ipynb
 

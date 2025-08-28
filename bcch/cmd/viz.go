@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"maps"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/v3/internal/bcch-api"
-	"github.com/iferdel/chile-economic-indexes-cli/v3/internal/fileio"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )
@@ -24,11 +24,11 @@ var vizCmd = &cobra.Command{
 	Use:   "viz",
 	Short: "Launch a visualization for a set of series",
 	Long: `
-		Start a local server intended to visualize series data.
+		Start a local web server with both static file serving and API endpoints for visualizing series data.
 
-		This command opens an static environment where you can
-visualize trends of a variety of predefined sets of series
-that are fetched from the BCCh API.
+		This command launches a hybrid server that serves static files (HTML, CSS, JS)
+and provides REST API endpoints for dynamic data fetching from BCCh API.
+The dashboard visualizes trends of predefined sets of series with interactive charts.
 By default, the server runs on http://localhost:49966,
 but you can configure the port and other options with flags.
 To check which set of series are available in this version,
@@ -51,15 +51,8 @@ take a look at 'search --predefined-sets'
 			setName = "EMPLOYMENT"
 		}
 
-		set, ok := AvailableSetsSeries[setName]
-		if !ok {
-			log.Fatalf("serie %q not present in available series: %v", setName, slices.Sorted(maps.Keys(AvailableSetsSeries)))
-		}
-
-		cfg.fetchSeries(setName, set, "./public/series.json", 3)
-
 		// can later use go for --detached mode
-		if err := StartVizServer("public", portFlag); err != nil {
+		if err := cfg.StartVizServer("public", portFlag); err != nil {
 			log.Fatalf("viz server error: %v", err)
 		}
 	}),
@@ -72,8 +65,7 @@ func init() {
 	vizCmd.Flags().StringP("port", "p", "49966", "Port for the visualization server")
 }
 
-// if filename is empty "", it saves it into memory?? --> redis?
-func (cfg *config) fetchSeries(setName string, set Set, filename string, maxConcurrency int) {
+func (cfg *config) fetchSeries(setName string, set Set, maxConcurrency int) map[string]OutputSetData {
 	seriesSetData, seriesSetErrors := cfg.bcchapiClient.GetMultipleSeriesData(
 		set.SeriesNames,
 		"",
@@ -94,18 +86,11 @@ func (cfg *config) fetchSeries(setName string, set Set, filename string, maxConc
 		},
 	}
 
-	if err := fileio.SaveSeriesToJSON(
-		outputSetData,
-		filename,
-	); err != nil {
-		fmt.Printf("Failed to save JSON: %v\n", err)
-	}
+	return outputSetData
 }
 
-func StartVizServer(publicDir, port string) error {
-	fs := http.FileServer(http.Dir(publicDir))
-
-	http.Handle("/", fs)
+func (cfg *config) StartVizServer(publicDir, port string) error {
+	const filepathRoot = "."
 
 	url := "http://localhost:" + port + "/"
 	go func() {
@@ -117,11 +102,70 @@ func StartVizServer(publicDir, port string) error {
 
 	log.Printf("Serving series visualization at %s -- Ctrl+C to stop", url)
 
+	mux := http.NewServeMux()
 	server := &http.Server{
 		Addr:         ":" + port,
-		Handler:      nil,
+		Handler:      mux,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
+	mux.Handle("/", http.FileServer(http.Dir(publicDir)))
+	mux.HandleFunc("GET /api/sets/{set}", cfg.handlerSetGet)
+
 	return server.ListenAndServe()
+}
+
+func (cfg *config) handlerSetGet(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	type responseBody struct {
+		Set map[string]OutputSetData
+	}
+
+	setName := strings.ToUpper(r.PathValue("set"))
+	set, ok := AvailableSetsSeries[setName]
+	if !ok {
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			"set not found",
+			fmt.Errorf("serie %q not present in available series: %v", setName, slices.Sorted(maps.Keys(AvailableSetsSeries))),
+		)
+		return
+	}
+
+	setData := cfg.fetchSeries(setName, set, 3)
+
+	respondWithJSON(w, http.StatusOK, responseBody{
+		Set: setData,
+	})
+
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload any) error {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(code)
+	w.Write(response)
+	return nil
+}
+
+func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
+	if err != nil {
+		log.Println(err)
+	}
+	if code > 499 {
+		log.Printf("Responding with 5XX error: %s", msg)
+	}
+	type errorResponse struct {
+		Error string `json:"error"`
+	}
+	respondWithJSON(w, code, errorResponse{
+		Error: msg,
+	})
 }
