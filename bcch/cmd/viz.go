@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"maps"
 	"net/http"
@@ -52,7 +54,7 @@ take a look at 'search --predefined-sets'
 		}
 
 		// can later use go for --detached mode
-		if err := cfg.StartVizServer("public", portFlag); err != nil {
+		if err := cfg.StartVizServer(EmbeddedFS, portFlag); err != nil {
 			log.Fatalf("viz server error: %v", err)
 		}
 	}),
@@ -89,8 +91,7 @@ func (cfg *config) fetchSeries(setName string, set Set, maxConcurrency int) map[
 	return outputSetData
 }
 
-func (cfg *config) StartVizServer(publicDir, port string) error {
-	const filepathRoot = "."
+func (cfg *config) StartVizServer(embeddedFS embed.FS, port string) error {
 
 	url := "http://localhost:" + port + "/"
 	go func() {
@@ -110,7 +111,11 @@ func (cfg *config) StartVizServer(publicDir, port string) error {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	mux.Handle("/", http.FileServer(http.Dir(publicDir)))
+	subFS, err := fs.Sub(embeddedFS, "public")
+	if err != nil {
+		return fmt.Errorf("could not create sub filesystem: %w", err)
+	}
+	mux.Handle("/", http.FileServer(http.FS(subFS)))
 	mux.HandleFunc("GET /api/sets/{set}", cfg.handlerSetGet)
 
 	return server.ListenAndServe()

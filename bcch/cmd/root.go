@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"embed"
 	"time"
 
 	bcchapi "github.com/iferdel/chile-economic-indexes-cli/v3/internal/bcch-api"
@@ -9,8 +10,9 @@ import (
 )
 
 var (
-	cfg     config
-	version string
+	cfg        config
+	version    string
+	EmbeddedFS embed.FS
 )
 
 const (
@@ -75,7 +77,8 @@ func SetVersion(v string) {
 }
 
 // Execute executes the root command.
-func Execute() error {
+func Execute(embeddedFS embed.FS) error {
+	EmbeddedFS = embeddedFS
 	return rootCmd.Execute()
 }
 
