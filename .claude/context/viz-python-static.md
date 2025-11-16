@@ -1,556 +1,607 @@
-# Python Static Chart Generation Guide
+# Python Matplotlib Charts - Hybrid Browser Toggle System
 
-This guide provides patterns for generating static chart images (PNG/SVG) using matplotlib, intended for the `viz` command to output saved files instead of/in addition to web dashboards.
+This guide documents the **hybrid visualization system** where users can toggle between Chart.js (interactive) and matplotlib (publication-quality) rendering engines **in the browser**.
 
-## Architecture: Static Chart Generation
+## Architecture Overview
 
-### Workflow
+### How It Works
 ```
-CLI Command → Fetch BCCh Data → Generate Matplotlib Charts → Save PNG/SVG →
-  Option 1: Save to directory
-  Option 2: Serve via simple gallery HTML
-  Option 3: Export as PDF report
+User clicks viz command
+    ↓
+Go server starts
+    ↓
+1. Fetches BCCh data via API
+2. Calls Python via `uv run generate_charts.py`
+3. Generates matplotlib PNGs → bcch/public/img/
+4. Serves hybrid HTML dashboard
+    ↓
+Browser loads
+    ↓
+User sees toggle: 📊 Chart.js | 🐍 Matplotlib
+    ↓
+Click to switch rendering engines instantly
 ```
 
-### Directory Structure
+### Key Features
+✓ **Browser toggle** - Switch engines without page reload
+✓ **Graceful fallback** - Works without Python (Chart.js only)
+✓ **Learning playground** - "PLAYGROUND" markers for customization
+✓ **Brand consistency** - Same colors across both engines
+✓ **High DPI** - 300 DPI for publication quality
+✓ **uv-based** - Modern Python package management
+
+## File Structure
+
 ```
-output/
-  └── employment/
-      ├── index.html          # Simple gallery
-      ├── national-trend.png
-      ├── regional-comparison.png
-      ├── regional-grid.png
-      └── metadata.json
+bcch/
+├── python/
+│   ├── pyproject.toml          # uv project config
+│   ├── .python-version         # Python 3.11+
+│   ├── README.md               # Setup & playground guide
+│   ├── generate_charts.py      # Orchestrator (called by Go)
+│   └── charts/
+│       ├── __init__.py
+│       ├── unemployment.py     # Chart 1: Unemployment + Imacec
+│       ├── exchange.py         # Chart 2: Exchange + Copper
+│       └── cpi.py              # Chart 3: CPI comparison
+│
+├── public/
+│   ├── img/                    # Generated matplotlib PNGs
+│   │   ├── unemployment_imacec.png
+│   │   ├── exchange_copper.png
+│   │   └── cpi_comparison.png
+│   ├── index.html              # Hybrid toggle UI
+│   ├── main.js                 # Toggle logic
+│   └── styles.css              # Toggle styling
+│
+└── cmd/
+    └── viz.go                  # Calls Python, serves both
 ```
 
-## Python Chart Generation Patterns
+## Chart Modules Explained
 
-### Pattern 1: Time Series with Professional Styling
+### 1. unemployment.py - Dual Y-Axis Pattern
+
+**Purpose**: Show unemployment trends across different regional economies with economic activity index
+
+**Key matplotlib techniques**:
+```python
+# Dual Y-axis for different metrics
+fig, ax1 = plt.subplots(figsize=(14, 7), dpi=100)
+
+# Primary Y-axis: Unemployment
+ax1.plot(dates, national_data, color='#69B3A2', linewidth=2.5)
+
+# Secondary Y-axis: Imacec (economic activity)
+ax2 = ax1.twinx()
+ax2.plot(dates, imacec_data, color='#d6604d', linewidth=2.5)
+
+# Combine legends from both axes
+lines1, labels1 = ax1.get_legend_handles_labels()
+lines2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
+```
+
+**PLAYGROUND markers**:
+- Line styles (solid, dashed, dotted)
+- Color schemes
+- Grid customization
+- Annotations for economic events
+
+### 2. exchange.py - Fill Between Pattern
+
+**Purpose**: Visualize relationship between exchange rate and copper prices
+
+**Key matplotlib techniques**:
+```python
+# Plot with fill areas
+ax.plot(dates, exchange_data, color='#69B3A2')
+ax.fill_between(dates, 0, exchange_data, alpha=0.1, color='#69B3A2')
+
+# Dual Y-axis for copper
+ax2 = ax.twinx()
+ax2.plot(dates, copper_data, color='#d6604d')
+```
+
+**PLAYGROUND markers**:
+- Fill alpha transparency
+- Moving averages
+- Correlation annotations
+- Event markers
+
+### 3. cpi.py - Comparative Visualization
+
+**Purpose**: Compare inflation trends between Chile and USA
+
+**Key matplotlib techniques**:
+```python
+# Comparative line plot
+ax.plot(dates, chile_cpi, label='Chile', color='#69B3A2', linewidth=2)
+ax.plot(dates, usa_cpi, label='USA', color='#251667', linewidth=2)
+
+# Reference line at zero
+ax.axhline(0, color='gray', linestyle='--', alpha=0.5)
+
+# Highlight divergence/convergence
+ax.fill_between(dates, chile_cpi, usa_cpi,
+                where=(chile_cpi > usa_cpi),
+                alpha=0.2, color='#69B3A2')
+```
+
+**PLAYGROUND markers**:
+- Statistical annotations (mean, std dev)
+- Zero-line references
+- Divergence highlighting
+- Period comparisons
+
+## Brand Colors (Consistent Across Engines)
 
 ```python
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from datetime import datetime
-import json
-
-# Brand colors from design-principles.md
-BRAND_COLORS = {
-    'primary': '#69B3A2',
-    'secondary': '#251667',
-    'highlight': '#FED136',
-    'neutral': '#E9ECEF',
-    'text': '#212529'
+# In Python charts
+colors = {
+    'primary': '#69B3A2',      # National/main metric
+    'secondary': '#251667',     # Secondary regions/metrics
+    'tertiary': '#FED136',      # Third metric
+    'accent': '#d6604d',        # Contrasting metric (Imacec, copper)
+    'grid': '#f0f0f0',         # Subtle grid
+    'text': '#666666'          # Axis labels
 }
-
-def create_employment_trend(data, output_path='employment_trend.png'):
-    """
-    Generate professional time series chart for employment data.
-
-    Args:
-        data: Dict with 'dates' (list) and 'values' (list)
-        output_path: Where to save the PNG
-    """
-    # Set up figure with high DPI for quality
-    fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
-
-    # Convert dates
-    dates = [datetime.fromisoformat(d) for d in data['dates']]
-    values = data['values']
-
-    # Plot with brand colors
-    ax.plot(dates, values,
-            color=BRAND_COLORS['primary'],
-            linewidth=2.5,
-            marker='o',
-            markersize=4,
-            markerfacecolor=BRAND_COLORS['primary'],
-            markeredgecolor=BRAND_COLORS['secondary'],
-            markeredgewidth=1,
-            label='Employment Rate')
-
-    # Styling following data-to-viz best practices
-    ax.set_xlabel('Month', fontsize=12, fontweight='bold')
-    ax.set_ylabel('Employment Rate (%)', fontsize=12, fontweight='bold')
-    ax.set_title('Chilean Employment Rate, 2020-2024',
-                 fontsize=14, fontweight='bold', pad=20)
-
-    # Format X-axis dates
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
-    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
-    plt.xticks(rotation=45, ha='right')
-
-    # Professional grid
-    ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
-    ax.set_axisbelow(True)  # Grid behind data
-
-    # Remove top and right spines (cleaner look)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color(BRAND_COLORS['text'])
-    ax.spines['bottom'].set_color(BRAND_COLORS['text'])
-
-    # Add reference line (e.g., national average)
-    if 'average' in data:
-        ax.axhline(data['average'],
-                   color=BRAND_COLORS['highlight'],
-                   linestyle='--',
-                   linewidth=2,
-                   alpha=0.7,
-                   label=f"Average: {data['average']:.1f}%")
-
-    # Add annotation for significant event
-    if 'events' in data:
-        for event in data['events']:
-            event_date = datetime.fromisoformat(event['date'])
-            ax.axvline(event_date,
-                      color=BRAND_COLORS['highlight'],
-                      linestyle=':',
-                      linewidth=1.5,
-                      alpha=0.6)
-            ax.text(event_date, ax.get_ylim()[1],
-                   event['label'],
-                   rotation=90,
-                   verticalalignment='top',
-                   fontsize=9,
-                   color=BRAND_COLORS['secondary'])
-
-    # Legend
-    ax.legend(loc='best', frameon=True, shadow=True)
-
-    # Tight layout to prevent label cutoff
-    plt.tight_layout()
-
-    # Save with high quality
-    plt.savefig(output_path,
-                dpi=150,
-                bbox_inches='tight',
-                facecolor='white',
-                edgecolor='none')
-    plt.close()
-
-    print(f"✓ Saved chart to {output_path}")
-    return output_path
 ```
 
-### Pattern 2: Regional Comparison Bar Chart
-
-```python
-def create_regional_comparison(regions_data, output_path='regional_comparison.png'):
-    """
-    Generate horizontal bar chart comparing regions.
-
-    Args:
-        regions_data: Dict with 'regions' (list) and 'rates' (list)
-    """
-    fig, ax = plt.subplots(figsize=(10, 8), dpi=150)
-
-    # Sort by value
-    sorted_data = sorted(zip(regions_data['regions'], regions_data['rates']),
-                        key=lambda x: x[1],
-                        reverse=True)
-    regions, rates = zip(*sorted_data)
-
-    # Determine colors (highlight national average)
-    colors = [BRAND_COLORS['highlight'] if r == 'Nacional'
-              else BRAND_COLORS['primary']
-              for r in regions]
-
-    # Create horizontal bars
-    bars = ax.barh(regions, rates,
-                   color=colors,
-                   edgecolor=BRAND_COLORS['secondary'],
-                   linewidth=1.5,
-                   height=0.7)
-
-    # Add value labels on bars
-    for i, (bar, rate) in enumerate(zip(bars, rates)):
-        width = bar.get_width()
-        ax.text(width + 0.3, i,
-                f'{rate:.1f}%',
-                va='center',
-                fontsize=10,
-                fontweight='bold',
-                color=BRAND_COLORS['text'])
-
-    # Styling
-    ax.set_xlabel('Employment Rate (%)', fontsize=12, fontweight='bold')
-    ax.set_title('Employment Rate by Region, Q4 2024',
-                 fontsize=14, fontweight='bold', pad=20)
-
-    # Clean spines
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
-    # Set X-axis limit with padding for labels
-    ax.set_xlim(0, max(rates) + 5)
-
-    # Grid
-    ax.grid(True, axis='x', alpha=0.3, linestyle='--')
-    ax.set_axisbelow(True)
-
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches='tight',
-                facecolor='white', edgecolor='none')
-    plt.close()
-
-    print(f"✓ Saved chart to {output_path}")
-    return output_path
+```javascript
+// In Chart.js (for comparison)
+const brandColors = {
+    primary: '#69B3A2',
+    secondary: '#251667',
+    highlight: '#FED136'
+};
 ```
 
-### Pattern 3: Small Multiples Grid
+## Professional Styling Checklist
 
-```python
-def create_regional_grid(all_regions_data, output_path='regional_grid.png'):
-    """
-    Generate small multiples showing each region's trend.
+Every matplotlib chart includes:
+- [x] **High DPI (300)** - Publication quality
+- [x] **Clean spines** - Top/right removed
+- [x] **Subtle grid** - Behind data (`set_axisbelow(True)`)
+- [x] **Professional typography** - weight='600' for labels
+- [x] **Tight layout** - No wasted space
+- [x] **White background** - `facecolor='white'`
+- [x] **Date formatting** - `mdates.DateFormatter('%Y-%m')`
+- [x] **Proper labels** - Units specified, clear titles
 
-    Args:
-        all_regions_data: Dict mapping region names to their time series data
-    """
-    regions = list(all_regions_data.keys())
-    n_regions = len(regions)
+## Go ↔ Python Integration
 
-    # Calculate grid dimensions
-    n_cols = 3
-    n_rows = (n_regions + n_cols - 1) // n_cols
-
-    fig, axes = plt.subplots(n_rows, n_cols,
-                             figsize=(15, 4 * n_rows),
-                             dpi=150,
-                             sharey=True)
-    axes = axes.flatten() if n_regions > 1 else [axes]
-
-    # Global Y-axis limits
-    all_values = [val for region_data in all_regions_data.values()
-                  for val in region_data['values']]
-    y_min, y_max = min(all_values) - 1, max(all_values) + 1
-
-    for idx, region in enumerate(regions):
-        ax = axes[idx]
-        data = all_regions_data[region]
-        dates = [datetime.fromisoformat(d) for d in data['dates']]
-
-        # Plot
-        ax.plot(dates, data['values'],
-                color=BRAND_COLORS['primary'],
-                linewidth=2)
-
-        # Reference line (national average)
-        if 'national_avg' in data:
-            ax.axhline(data['national_avg'],
-                      color=BRAND_COLORS['highlight'],
-                      linestyle='--',
-                      linewidth=1,
-                      alpha=0.7)
-
-        # Title
-        ax.set_title(region, fontsize=11, fontweight='bold')
-
-        # Styling
-        ax.set_ylim(y_min, y_max)
-        ax.grid(True, alpha=0.2)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
-        # Labels only on edges
-        if idx >= n_regions - n_cols:  # Bottom row
-            ax.set_xlabel('Year', fontsize=9)
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-        else:
-            ax.set_xticklabels([])
-
-        if idx % n_cols == 0:  # Left column
-            ax.set_ylabel('Rate (%)', fontsize=9)
-
-    # Hide unused subplots
-    for idx in range(n_regions, len(axes)):
-        axes[idx].set_visible(False)
-
-    # Overall title
-    fig.suptitle('Regional Employment Trends, 2020-2024',
-                 fontsize=16, fontweight='bold', y=0.995)
-
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches='tight',
-                facecolor='white', edgecolor='none')
-    plt.close()
-
-    print(f"✓ Saved chart to {output_path}")
-    return output_path
-```
-
-## CLI Integration Pattern
-
-### Go calls Python script
-
-```python
-# scripts/generate_charts.py
-#!/usr/bin/env python3
-"""
-Generate static charts for BCCh economic data.
-Called by Go CLI with JSON data via stdin.
-"""
-
-import sys
-import json
-import argparse
-from pathlib import Path
-from chart_generators import (
-    create_employment_trend,
-    create_regional_comparison,
-    create_regional_grid
-)
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--set', required=True, help='Dataset name (e.g., EMPLOYMENT)')
-    parser.add_argument('--output-dir', required=True, help='Output directory')
-    parser.add_argument('--format', default='png', choices=['png', 'svg', 'pdf'])
-    args = parser.parse_args()
-
-    # Read data from stdin (passed by Go)
-    data = json.load(sys.stdin)
-
-    # Create output directory
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Generate charts based on dataset type
-    if args.set == 'EMPLOYMENT':
-        # Chart 1: National trend
-        create_employment_trend(
-            data['national'],
-            output_dir / f'national_trend.{args.format}'
-        )
-
-        # Chart 2: Regional comparison
-        create_regional_comparison(
-            data['regional'],
-            output_dir / f'regional_comparison.{args.format}'
-        )
-
-        # Chart 3: Small multiples
-        create_regional_grid(
-            data['regional_time_series'],
-            output_dir / f'regional_grid.{args.format}'
-        )
-
-    # Generate simple HTML gallery
-    generate_gallery_html(output_dir, args.set)
-
-    print(f"\n✓ All charts saved to {output_dir}")
-    print(f"  Open {output_dir}/index.html to view")
-
-def generate_gallery_html(output_dir, dataset_name):
-    """Create simple HTML gallery for generated charts."""
-    charts = list(output_dir.glob('*.png')) + list(output_dir.glob('*.svg'))
-
-    html = f"""
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{dataset_name} - Chilean Economic Indicators</title>
-    <style>
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f8f9fa;
-        }}
-        h1 {{
-            color: #251667;
-            border-bottom: 3px solid #69B3A2;
-            padding-bottom: 10px;
-        }}
-        .chart {{
-            background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }}
-        img {{
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }}
-    </style>
-</head>
-<body>
-    <h1>{dataset_name} Charts</h1>
-    <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-"""
-
-    for chart in sorted(charts):
-        chart_name = chart.stem.replace('_', ' ').title()
-        html += f"""
-    <div class="chart">
-        <h2>{chart_name}</h2>
-        <img src="{chart.name}" alt="{chart_name}">
-    </div>
-"""
-
-    html += """
-</body>
-</html>
-"""
-
-    (output_dir / 'index.html').write_text(html)
-
-if __name__ == '__main__':
-    main()
-```
-
-### Modified Go viz command
+### How Go Calls Python
 
 ```go
 // In bcch/cmd/viz.go
 
-import (
-    "encoding/json"
-    "os/exec"
-    "bytes"
-)
+func (cfg *config) generateMatplotlibCharts(setName string, setData map[string]OutputSetData) error {
+    log.Println("Generating matplotlib charts...")
 
-var vizCmd = &cobra.Command{
-    Use:   "viz",
-    Short: "Generate visualizations for economic data",
-    Run: func(cmd *cobra.Command, args []string) {
-        setName := "EMPLOYMENT"
-        outputDir := "./output/employment"
-        format := "png"  // or "svg", "pdf"
+    // 1. Marshal data to JSON
+    jsonData, err := json.Marshal(setData)
 
-        // Fetch data from BCCh API
-        data := cfg.fetchSeries(setName, set, 3)
+    // 2. Get paths
+    pythonScript := filepath.Join(cwd, "bcch", "python", "generate_charts.py")
+    outputDir := filepath.Join(cwd, "bcch", "public", "img")
 
-        // Convert to JSON
-        jsonData, _ := json.Marshal(data)
+    // 3. Call Python via uv
+    cmd := exec.Command("uv", "run",
+        "--directory", filepath.Join(cwd, "bcch", "python"),
+        "python", "generate_charts.py",
+        string(jsonData), outputDir)
 
-        // Call Python script
-        pythonCmd := exec.Command(
-            "python3",
-            "scripts/generate_charts.py",
-            "--set", setName,
-            "--output-dir", outputDir,
-            "--format", format,
-        )
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
 
-        pythonCmd.Stdin = bytes.NewReader(jsonData)
-        pythonCmd.Stdout = os.Stdout
-        pythonCmd.Stderr = os.Stderr
-
-        if err := pythonCmd.Run(); err != nil {
-            log.Fatalf("Failed to generate charts: %v", err)
-        }
-
-        // Option: Open browser to view gallery
-        browser.OpenURL(fmt.Sprintf("file://%s/index.html", outputDir))
-    },
-}
-```
-
-## Quality Standards for Static Charts
-
-### File Specifications
-- **Format**: PNG (raster) or SVG (vector)
-- **DPI**: 150 minimum (300 for print)
-- **Size**:
-  - Single chart: 1200-1500px wide
-  - Grid: 1500-1800px wide
-  - Mobile-friendly: Responsive HTML gallery
-
-### Accessibility
-```python
-# Add alt text metadata
-chart_metadata = {
-    'filename': 'employment_trend.png',
-    'alt_text': 'Line chart showing Chilean employment rate from 92% in 2020 to 95% in 2024',
-    'description': 'Employment rate steadily increased except for pandemic dip in 2020',
-    'data_summary': {
-        'min': 91.2,
-        'max': 95.8,
-        'trend': 'increasing'
+    // 4. Execute
+    if err := cmd.Run(); err != nil {
+        return fmt.Errorf("failed to generate matplotlib charts: %w", err)
     }
+
+    log.Println("✓ Matplotlib charts generated successfully")
+    return nil
 }
 ```
 
-### Professional Styling Checklist
-- [ ] Brand colors applied (#69B3A2, #251667, #FED136)
-- [ ] High DPI (150+) for sharp rendering
-- [ ] Clean spines (top/right removed)
-- [ ] Subtle grid behind data
-- [ ] Professional typography (bold titles, clear labels)
-- [ ] Proper date formatting
-- [ ] Value labels where helpful
-- [ ] White background (good for reports/presentations)
-- [ ] Tight bounding box (no wasted space)
-- [ ] Annotations for important events
-- [ ] Legend only when necessary
+### Graceful Fallback
 
-## Testing Generated Charts
+If Python/uv is unavailable:
+```go
+// In StartVizServer
+if err := cfg.generateMatplotlibCharts(setName, setData); err != nil {
+    log.Printf("⚠ Warning: Could not generate matplotlib charts: %v", err)
+    log.Printf("⚠ Continuing with Chart.js visualization only")
+    // Server continues, toggle buttons will be hidden or disabled
+}
+```
+
+## Browser Toggle Implementation
+
+### HTML Structure
+
+```html
+<!-- Toggle UI -->
+<div class="engine-toggle">
+    <span class="toggle-label">Rendering Engine:</span>
+    <div class="toggle-buttons">
+        <button class="toggle-btn active" data-engine="chartjs">
+            <span class="toggle-icon">📊</span>
+            Chart.js (Interactive)
+        </button>
+        <button class="toggle-btn" data-engine="matplotlib">
+            <span class="toggle-icon">🐍</span>
+            Matplotlib (Python)
+        </button>
+    </div>
+</div>
+
+<!-- Each chart has both versions -->
+<div class="chart-container">
+    <!-- Chart.js Version (default visible) -->
+    <div class="chart-wrapper" data-engine="chartjs">
+        <canvas id="unemploymentChart"></canvas>
+    </div>
+
+    <!-- Matplotlib Version (hidden initially) -->
+    <div class="chart-wrapper hidden" data-engine="matplotlib">
+        <img src="img/unemployment_imacec.png" alt="Matplotlib" class="matplotlib-chart">
+    </div>
+</div>
+```
+
+### JavaScript Toggle Logic
+
+```javascript
+function switchRenderingEngine(engine) {
+    currentEngine = engine;
+
+    // Update button states
+    toggleButtons.forEach(btn => {
+        if (btn.dataset.engine === engine) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Show/hide chart wrappers with fade effect
+    document.querySelectorAll('.chart-wrapper').forEach(wrapper => {
+        if (wrapper.dataset.engine === engine) {
+            wrapper.classList.remove('hidden');
+            setTimeout(() => wrapper.classList.add('visible'), 10);
+        } else {
+            wrapper.classList.add('hidden');
+            wrapper.classList.remove('visible');
+        }
+    });
+}
+```
+
+## Customization Workflow (PLAYGROUND)
+
+### 1. Identify What to Customize
+
+Each chart module has **PLAYGROUND markers**:
+```python
+# PLAYGROUND: Customize figure size and DPI for different outputs
+fig, ax1 = plt.subplots(figsize=(14, 7), dpi=100)
+
+# PLAYGROUND: Brand colors - customize these to match your design system
+colors = {
+    'primary': '#69B3A2',
+    'secondary': '#251667',
+    # ... add your colors here
+}
+
+# PLAYGROUND: Try different line styles, widths, and markers
+ax1.plot(dates, data,
+         color=colors['primary'],
+         linewidth=2.5,        # Try: 1.5, 2.0, 3.0
+         linestyle='-',        # Try: '--', ':', '-.'
+         marker='o',           # Try: 's', '^', 'D'
+         alpha=0.9)            # Try: 0.5, 0.7, 1.0
+```
+
+### 2. Make Changes
+
+```bash
+# Edit chart module
+vim bcch/python/charts/unemployment.py
+
+# Change something, e.g., add annotations:
+ax.annotate('COVID-19 Pandemic',
+            xy=(datetime(2020, 3, 1), 10),
+            xytext=(datetime(2020, 6, 1), 12),
+            arrowprops=dict(arrowstyle='->', color='red'))
+```
+
+### 3. Test Your Changes
+
+```bash
+# Run the viz command
+go run ./bcch viz
+
+# Browser opens with toggle
+# Click 🐍 Matplotlib to see your changes
+# Click 📊 Chart.js to compare
+```
+
+### 4. Iterate
+
+Keep refining until it looks professional!
+
+## Common Customizations
+
+### Add Economic Event Annotations
 
 ```python
-def test_chart_quality(chart_path):
-    """Validate generated chart meets standards."""
-    from PIL import Image
+# Mark a specific date
+pandemic_start = datetime(2020, 3, 1)
+ax.axvline(pandemic_start,
+           color='red',
+           linestyle=':',
+           linewidth=1.5,
+           alpha=0.6)
 
-    img = Image.open(chart_path)
-
-    # Check DPI
-    assert img.info.get('dpi', (0, 0))[0] >= 150, "DPI too low"
-
-    # Check dimensions
-    width, height = img.size
-    assert width >= 1200, f"Width too small: {width}px"
-
-    # Check file size (shouldn't be too large)
-    file_size_mb = Path(chart_path).stat().st_size / (1024 * 1024)
-    assert file_size_mb < 2, f"File too large: {file_size_mb:.1f}MB"
-
-    print(f"✓ {chart_path.name} passes quality checks")
+ax.text(pandemic_start, ax.get_ylim()[1],
+        'COVID-19\nPandemic',
+        rotation=90,
+        verticalalignment='top',
+        fontsize=9)
 ```
 
-## Output Structure
+### Change Color Palette
 
-```
-output/
-└── employment/
-    ├── index.html                 # Gallery view
-    ├── national_trend.png         # Time series
-    ├── regional_comparison.png    # Bar chart
-    ├── regional_grid.png          # Small multiples
-    ├── metadata.json              # Chart info for accessibility
-    └── data.json                  # Raw data for reproducibility
+```python
+# Try seaborn palettes
+import seaborn as sns
+colors_list = sns.color_palette("husl", 3)  # or "Set2", "Paired"
+
+ax.plot(dates, data1, color=colors_list[0])
+ax.plot(dates, data2, color=colors_list[1])
 ```
 
-## Dependencies
+### Add Statistical Overlays
 
+```python
+import numpy as np
+
+# Moving average
+window = 12  # 12-month rolling average
+moving_avg = pd.Series(data).rolling(window=window).mean()
+
+ax.plot(dates, moving_avg,
+        color='gray',
+        linestyle='--',
+        label=f'{window}-month MA')
+
+# Confidence interval
+std_dev = pd.Series(data).rolling(window=window).std()
+ax.fill_between(dates,
+                moving_avg - std_dev,
+                moving_avg + std_dev,
+                alpha=0.2,
+                color='gray')
 ```
-# requirements.txt
-matplotlib>=3.8.0
-pandas>=2.1.0
-Pillow>=10.0.0  # For image validation
+
+### Change Output Format
+
+```python
+# In chart modules, change savefig format:
+
+# SVG (scalable, great for web)
+plt.savefig(output_path.replace('.png', '.svg'),
+            format='svg', bbox_inches='tight')
+
+# PDF (print-ready)
+plt.savefig(output_path.replace('.png', '.pdf'),
+            format='pdf', dpi=300, bbox_inches='tight')
 ```
 
-## When to Use Static vs Web Viz
+## Setup & Dependencies
 
-**Static PNG/SVG (Python)**:
-✓ Reports and presentations
-✓ Email attachments
-✓ Print materials
-✓ Archival/documentation
-✓ Offline viewing
-✓ Consistent rendering across platforms
+### Install uv
 
-**Web Interactive (Chart.js/D3)**:
-✓ Real-time dashboards
-✓ User exploration (zoom, filter, drill-down)
-✓ Mobile responsive interfaces
-✓ Live data updates
-✓ Sharing via URL
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-**Best of Both**:
-Generate static charts for reports, serve web dashboard for exploration.
+# Or with pip
+pip install uv
+```
+
+### Install Project Dependencies
+
+```bash
+cd bcch/python
+uv sync  # Creates venv, installs matplotlib + numpy, generates lockfile
+```
+
+### Verify Setup
+
+```bash
+# Check Python version
+python --version  # Should be 3.11+
+
+# Check uv
+uv --version
+
+# Test chart generation manually
+cd bcch/python
+uv run generate_charts.py '<json_data>' ../public/img
+```
+
+## Troubleshooting
+
+### Charts not generating?
+
+**Check logs:**
+```bash
+go run ./bcch viz
+# Look for:
+# "Generating matplotlib charts..."
+# "✓ Matplotlib charts generated successfully"
+# Or errors like "uv not found in PATH"
+```
+
+**Common fixes:**
+```bash
+# uv not installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Wrong Python version
+uv python install 3.11
+
+# Missing dependencies
+cd bcch/python && uv sync
+```
+
+### Toggle not working?
+
+**If matplotlib toggle is grayed out:**
+- Charts didn't generate (check logs)
+- Image files missing in `bcch/public/img/`
+- Server couldn't serve `/img/` directory
+
+**Fix:**
+```bash
+# Regenerate charts
+go run ./bcch viz
+
+# Check images exist
+ls bcch/public/img/
+# Should see: unemployment_imacec.png, exchange_copper.png, cpi_comparison.png
+```
+
+### Want to test Python script directly?
+
+```bash
+cd bcch/python
+
+# Create test data
+cat > test_data.json << 'EOF'
+{
+  "EMPLOYMENT": {
+    "seriesData": {
+      "F049.DES.TAS.INE.10.M": {
+        "Series": {
+          "Obs": [
+            {"indexDateString": "01-01-2020", "value": "7.5"},
+            {"indexDateString": "01-02-2020", "value": "7.3"}
+          ]
+        }
+      }
+    }
+  }
+}
+EOF
+
+# Run generator
+uv run generate_charts.py "$(cat test_data.json)" ../public/img
+```
+
+## Comparison: Chart.js vs Matplotlib
+
+| Aspect | Chart.js 📊 | Matplotlib 🐍 |
+|--------|------------|--------------|
+| **Interactivity** | ✓ Tooltips, zoom, pan | Static image |
+| **Quality** | Good (browser rendered) | Excellent (300 DPI) |
+| **Load Time** | Instant (client-side) | Pre-generated (fast) |
+| **Customization** | Via JS/CSS | Via Python code |
+| **Use Case** | Exploration, dashboards | Reports, papers, presentations |
+| **Dependencies** | None (browser only) | Python, uv, matplotlib |
+| **File Size** | Lightweight (canvas) | Larger (PNG ~500KB each) |
+| **Accessibility** | Built-in browser support | Alt text, image description |
+
+## Best Practices
+
+### When to Use Matplotlib Toggle
+
+**Use matplotlib when**:
+✓ Creating screenshots for presentations
+✓ Exporting charts for reports/papers
+✓ Need publication-quality (300 DPI)
+✓ Want to learn matplotlib techniques
+✓ Comparing rendering approaches
+
+**Use Chart.js when**:
+✓ Exploring data interactively
+✓ Need real-time tooltips
+✓ Zooming/panning required
+✓ Sharing live dashboard URL
+✓ Python not available
+
+### Learning Path
+
+1. **Start with Chart.js** - Understand the data
+2. **Toggle to matplotlib** - See static version
+3. **Customize Python charts** - Add your touches
+4. **Compare results** - Toggle back and forth
+5. **Export favorites** - Save matplotlib PNGs for reports
+
+## Advanced: Batch Generation
+
+Generate charts for different time periods or sets:
+
+```python
+# In generate_charts.py, add custom date range filtering
+def generate_all_charts(data: Dict[str, Any], output_dir: str, date_range: tuple = None) -> None:
+    if date_range:
+        start_date, end_date = date_range
+        # Filter data by date range
+        filtered_data = filter_by_date(data, start_date, end_date)
+    else:
+        filtered_data = data
+
+    # Generate with filtered data
+    generate_unemployment_chart(filtered_data, str(output_path / "unemployment.png"))
+```
+
+## Contributing New Charts
+
+To add a new chart type:
+
+1. **Create module**: `bcch/python/charts/my_chart.py`
+2. **Follow pattern**:
+   ```python
+   def generate_my_chart(data: dict, output_path: str) -> None:
+       """Docstring explaining what this chart shows."""
+
+       # Extract series
+       series1 = data.get('SERIES_ID_1', {})
+
+       # Create figure
+       fig, ax = plt.subplots(figsize=(14, 7), dpi=100)
+
+       # Plot with brand colors
+       ax.plot(dates, values, color='#69B3A2')
+
+       # Styling
+       ax.set_xlabel('Date', fontsize=12, weight='600')
+       # ... more styling
+
+       # Save
+       plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+       plt.close()
+   ```
+
+3. **Export**: Add to `charts/__init__.py`
+4. **Call**: Add to `generate_charts.py`
+5. **Display**: Add to `index.html` with toggle
+6. **Test**: Run `go run ./bcch viz`
+
+## Summary
+
+This **hybrid browser toggle system** gives you the best of both worlds:
+- 📊 **Chart.js** for interactive exploration
+- 🐍 **Matplotlib** for publication-quality static charts
+
+Users can instantly switch between rendering engines to:
+- **Learn** matplotlib visualization techniques
+- **Compare** different rendering approaches
+- **Export** professional charts for reports
+- **Explore** data interactively
+
+The system gracefully falls back to Chart.js if Python is unavailable, making it robust for all users.
