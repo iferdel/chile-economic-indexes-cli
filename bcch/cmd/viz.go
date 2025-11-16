@@ -119,7 +119,7 @@ func (cfg *config) generateMatplotlibCharts(setName string, setData map[string]O
 	}
 
 	// Create output directory if it doesn't exist
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
+	if err := os.MkdirAll(outputDir, 0750); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -130,6 +130,7 @@ func (cfg *config) generateMatplotlibCharts(setName string, setData map[string]O
 	}
 
 	// Execute Python script with uv
+	// #nosec G204 -- uvPath is validated via exec.LookPath, jsonData is marshaled JSON, outputDir is constructed with filepath.Join
 	cmd := exec.Command(uvPath, "run", "--directory", filepath.Join(cwd, "bcch", "python"), "python", "generate_charts.py", string(jsonData), outputDir)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -218,7 +219,7 @@ func (cfg *config) handlerSetGet(w http.ResponseWriter, r *http.Request) {
 
 	setData := cfg.fetchSeries(setName, set, 3)
 
-	respondWithJSON(w, http.StatusOK, responseBody{
+	_ = respondWithJSON(w, http.StatusOK, responseBody{ // #nosec G104 -- HTTP handler, cannot handle response errors
 		Set: setData,
 	})
 
@@ -227,12 +228,12 @@ func (cfg *config) handlerSetGet(w http.ResponseWriter, r *http.Request) {
 func respondWithJSON(w http.ResponseWriter, code int, payload any) error {
 	response, err := json.Marshal(payload)
 	if err != nil {
-		return nil
+		return err
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(code)
-	w.Write(response)
+	_, _ = w.Write(response) // #nosec G104 -- error writing response cannot be handled at this point
 	return nil
 }
 
@@ -246,7 +247,7 @@ func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	type errorResponse struct {
 		Error string `json:"error"`
 	}
-	respondWithJSON(w, code, errorResponse{
+	_ = respondWithJSON(w, code, errorResponse{ // #nosec G104 -- HTTP handler, cannot handle response errors
 		Error: msg,
 	})
 }
