@@ -6,7 +6,7 @@ import (
 	"github.com/iferdel/chile-economic-indexes-cli/v3/bcch/cmd"
 )
 
-//go:embed public/*
+//go:embed public/*.html public/*.css public/*.js
 var PublicEmbeddedFS embed.FS
 
 var version = "dev"

@@ -176,11 +176,22 @@ func (cfg *config) StartVizServer(embeddedFS embed.FS, port string) error {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	// Serve matplotlib generated images from disk (not embedded)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get working directory: %w", err)
+	}
+	imgDir := filepath.Join(cwd, "bcch", "public", "img")
+	mux.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir(imgDir))))
+
+	// Serve static files from embedded FS
 	subFS, err := fs.Sub(embeddedFS, "public")
 	if err != nil {
 		return fmt.Errorf("could not create sub filesystem: %w", err)
 	}
 	mux.Handle("/", http.FileServer(http.FS(subFS)))
+
+	// API endpoints
 	mux.HandleFunc("GET /api/sets/{set}", cfg.handlerSetGet)
 
 	return server.ListenAndServe()
