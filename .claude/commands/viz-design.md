@@ -7,16 +7,47 @@ You are helping design and implement **professional-grade** data visualizations 
 - **Style guide**: `.claude/context/style-guide.md`
 - **Knowledge base**: `.claude/context/viz-knowledge-base.md`
 - **Examples library**: `.claude/context/viz-examples.md`
+- **Python static charts**: `.claude/context/viz-python-static.md`
 - **Curation guide**: `.claude/context/content-curation-guide.md`
 
-## Technology Stack
+## Technology Stack Options
+
+### Option A: Web Interactive (Current Default)
 - **Frontend**: Chart.js (simple) or D3.js (complex custom viz)
-- **Fallback**: Vanilla JavaScript with Canvas API
 - **Data Source**: REST API endpoint `/api/sets/{set}` returns JSON
 - **Deployment**: Static files in `public/` folder, embedded in Go binary
-- **Development**: Use `--dev` flag to disable caching
+- **Use cases**: Dashboards, exploration, real-time updates
 
-## Workflow: Building a Visualization
+### Option B: Static Images (Python + Matplotlib)
+- **Generator**: Python scripts using matplotlib
+- **Output**: PNG/SVG files + HTML gallery
+- **Deployment**: Files in `output/` directory
+- **Use cases**: Reports, presentations, print, archival
+- **See**: `.claude/context/viz-python-static.md` for patterns
+
+### Option C: Hybrid (Best of Both Worlds)
+- Generate static charts for reports/presentations
+- Serve interactive web dashboard for exploration
+
+## Decision: Static vs Interactive
+
+**Choose Static (Python/matplotlib) if**:
+✓ Creating charts for PDF reports
+✓ Need print-quality output (300+ DPI)
+✓ Charts for email/PowerPoint presentations
+✓ Offline viewing required
+✓ Consistent rendering across all platforms
+✓ Archival/documentation purposes
+
+**Choose Interactive (Web) if**:
+✓ Building a live dashboard
+✓ Users need to explore data (zoom, filter, drill-down)
+✓ Real-time or frequently updated data
+✓ Mobile responsive interface needed
+✓ Sharing via URL
+✓ Want to embed in web application
+
+## Workflow: Building Interactive Web Viz
 
 ### Step 1: Understand the Data
 ```bash
@@ -111,6 +142,65 @@ For complex visualizations, use:
 ```bash
 # Invoke viz-review agent
 @agent viz-review "Review the employment dashboard at http://localhost:49966"
+```
+
+## Workflow: Building Static Python Charts
+
+### Step 1: Define Requirements
+```
+What charts do you need?
+- For reports: Single high-quality images
+- For presentations: Multiple charts with consistent styling
+- For archival: SVG format for scalability
+```
+
+### Step 2: Select Chart Patterns
+Refer to `viz-python-static.md` for:
+- Pattern 1: Time series with professional styling
+- Pattern 2: Regional comparison bar chart
+- Pattern 3: Small multiples grid
+
+### Step 3: Implement Python Script
+```python
+# scripts/generate_employment_charts.py
+from chart_generators import (
+    create_employment_trend,
+    create_regional_comparison,
+    create_regional_grid
+)
+
+# Brand colors (consistent with web)
+BRAND_COLORS = {
+    'primary': '#69B3A2',
+    'secondary': '#251667',
+    'highlight': '#FED136',
+    'neutral': '#E9ECEF',
+    'text': '#212529'
+}
+
+# Generate charts...
+```
+
+### Step 4: Integrate with Go CLI
+```go
+// Call Python from Go
+pythonCmd := exec.Command(
+    "python3", "scripts/generate_charts.py",
+    "--set", setName,
+    "--output-dir", "./output/employment",
+    "--format", "png",  // or "svg"
+)
+```
+
+### Step 5: Quality Check
+```
+- [ ] DPI >= 150 (300 for print)
+- [ ] Brand colors applied correctly
+- [ ] Clean spines (top/right removed)
+- [ ] Professional typography
+- [ ] Proper date formatting
+- [ ] File size reasonable (<2MB per chart)
+- [ ] HTML gallery generated
 ```
 
 ## Common Economic Viz Patterns
@@ -297,29 +387,43 @@ From `viz-knowledge-base.md`:
 - **Baselines**: Show national average or pre-crisis level
 - **Events**: Annotate policy changes, crises
 
-## When to Use D3.js vs Chart.js
+## When to Use D3.js vs Chart.js vs Matplotlib
 
 **Use Chart.js when**:
 - Standard chart types (line, bar, area, scatter)
-- Quick implementation needed
+- Quick web implementation needed
 - Responsive out-of-the-box
 - Simple interactions
+- **Output**: Interactive web dashboard
 
 **Use D3.js when**:
-- Custom, non-standard visualizations
+- Custom, non-standard web visualizations
 - Complex interactions (brushing, zooming, linking)
 - Geographic maps (with TopoJSON)
 - Need fine-grained control
+- **Output**: Interactive web dashboard
 
-**Examples in viz-examples.md** show both implementations.
+**Use Matplotlib (Python) when**:
+- Need static image files (PNG, SVG, PDF)
+- Creating charts for reports/presentations
+- Print-quality output required (300 DPI)
+- Offline viewing
+- Batch generation of many charts
+- **Output**: Static image files
+
+**Examples in viz-examples.md** show Chart.js/D3.js patterns.
+**Examples in viz-python-static.md** show matplotlib patterns.
 
 ## Final Reminder
 
 🎯 **Goal**: Create visualizations that:
 1. **Inform**: Clear insights at a glance
-2. **Engage**: Interactive and responsive
+2. **Engage**: Interactive (web) or polished (static)
 3. **Accessible**: Everyone can use them
 4. **Trustworthy**: Accurate, not misleading
 5. **Beautiful**: Professional brand-aligned design
 
-Refer to the examples library and knowledge base throughout implementation. Use WebFetch for edge cases not covered. Get viz-review for comprehensive validation.
+**For interactive web viz**: Refer to examples library and knowledge base
+**For static charts**: Refer to viz-python-static.md
+**For edge cases**: Use WebFetch to check data-to-viz.com
+**For comprehensive review**: Invoke viz-review agent
