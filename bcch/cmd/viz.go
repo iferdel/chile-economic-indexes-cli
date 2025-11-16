@@ -115,7 +115,7 @@ func (cfg *config) generateMatplotlibCharts(setName string, setData map[string]O
 
 	// Check if Python script exists
 	if _, err := os.Stat(pythonScript); os.IsNotExist(err) {
-		return fmt.Errorf("Python script not found at %s", pythonScript)
+		return fmt.Errorf("python script not found at %s", pythonScript)
 	}
 
 	// Create output directory if it doesn't exist
