@@ -8,6 +8,9 @@ import (
 	"log"
 	"maps"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"slices"
 	"strings"
 	"time"
@@ -91,7 +94,70 @@ func (cfg *config) fetchSeries(setName string, set Set, maxConcurrency int) map[
 	return outputSetData
 }
 
+func (cfg *config) generateMatplotlibCharts(setName string, setData map[string]OutputSetData) error {
+	log.Println("Generating matplotlib charts...")
+
+	// Marshal data to JSON for Python script
+	jsonData, err := json.Marshal(setData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal data for Python: %w", err)
+	}
+
+	// Get working directory to construct paths
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get working directory: %w", err)
+	}
+
+	// Paths
+	pythonScript := filepath.Join(cwd, "bcch", "python", "generate_charts.py")
+	outputDir := filepath.Join(cwd, "bcch", "public", "img")
+
+	// Check if Python script exists
+	if _, err := os.Stat(pythonScript); os.IsNotExist(err) {
+		return fmt.Errorf("python script not found at %s", pythonScript)
+	}
+
+	// Create output directory if it doesn't exist
+	if err := os.MkdirAll(outputDir, 0750); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Check if uv is available
+	uvPath, err := exec.LookPath("uv")
+	if err != nil {
+		return fmt.Errorf("uv not found in PATH - please install uv: https://github.com/astral-sh/uv")
+	}
+
+	// Execute Python script with uv
+	// #nosec G204 -- uvPath is validated via exec.LookPath, jsonData is marshaled JSON, outputDir is constructed with filepath.Join
+	cmd := exec.Command(uvPath, "run", "--directory", filepath.Join(cwd, "bcch", "python"), "python", "generate_charts.py", string(jsonData), outputDir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to generate matplotlib charts: %w", err)
+	}
+
+	log.Println("✓ Matplotlib charts generated successfully")
+	return nil
+}
+
 func (cfg *config) StartVizServer(embeddedFS embed.FS, port string) error {
+	// Fetch data for chart generation
+	setName := "EMPLOYMENT" // Default set
+	set, ok := AvailableSetsSeries[setName]
+	if !ok {
+		return fmt.Errorf("default set %q not found", setName)
+	}
+
+	setData := cfg.fetchSeries(setName, set, 3)
+
+	// Generate matplotlib charts (optional - graceful fallback if it fails)
+	if err := cfg.generateMatplotlibCharts(setName, setData); err != nil {
+		log.Printf("⚠ Warning: Could not generate matplotlib charts: %v", err)
+		log.Printf("⚠ Continuing with Chart.js visualization only")
+	}
 
 	url := "http://localhost:" + port + "/"
 	go func() {
@@ -111,11 +177,22 @@ func (cfg *config) StartVizServer(embeddedFS embed.FS, port string) error {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	// Serve matplotlib generated images from disk (not embedded)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get working directory: %w", err)
+	}
+	imgDir := filepath.Join(cwd, "bcch", "public", "img")
+	mux.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir(imgDir))))
+
+	// Serve static files from embedded FS
 	subFS, err := fs.Sub(embeddedFS, "public")
 	if err != nil {
 		return fmt.Errorf("could not create sub filesystem: %w", err)
 	}
 	mux.Handle("/", http.FileServer(http.FS(subFS)))
+
+	// API endpoints
 	mux.HandleFunc("GET /api/sets/{set}", cfg.handlerSetGet)
 
 	return server.ListenAndServe()
@@ -142,7 +219,7 @@ func (cfg *config) handlerSetGet(w http.ResponseWriter, r *http.Request) {
 
 	setData := cfg.fetchSeries(setName, set, 3)
 
-	respondWithJSON(w, http.StatusOK, responseBody{
+	_ = respondWithJSON(w, http.StatusOK, responseBody{ // #nosec G104 -- HTTP handler, cannot handle response errors
 		Set: setData,
 	})
 
@@ -151,12 +228,12 @@ func (cfg *config) handlerSetGet(w http.ResponseWriter, r *http.Request) {
 func respondWithJSON(w http.ResponseWriter, code int, payload any) error {
 	response, err := json.Marshal(payload)
 	if err != nil {
-		return nil
+		return err
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(code)
-	w.Write(response)
+	_, _ = w.Write(response) // #nosec G104 -- error writing response cannot be handled at this point
 	return nil
 }
 
@@ -170,7 +247,7 @@ func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	type errorResponse struct {
 		Error string `json:"error"`
 	}
-	respondWithJSON(w, code, errorResponse{
+	_ = respondWithJSON(w, code, errorResponse{ // #nosec G104 -- HTTP handler, cannot handle response errors
 		Error: msg,
 	})
 }

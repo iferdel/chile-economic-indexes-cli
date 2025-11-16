@@ -1,5 +1,62 @@
 // Main JavaScript file for Chile Economic Indicators Dashboard
 let seriesData = null;
+let currentEngine = 'chartjs'; // Default rendering engine
+
+// ============================================================================
+// Rendering Engine Toggle
+// ============================================================================
+
+/**
+ * Initialize rendering engine toggle functionality
+ */
+function initEngineToggle() {
+    const toggleButtons = document.querySelectorAll('.engine-toggle .toggle-btn');
+
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const engine = e.currentTarget.dataset.engine;
+            switchRenderingEngine(engine);
+        });
+    });
+}
+
+/**
+ * Switch between Chart.js and Matplotlib rendering engines
+ * @param {string} engine - 'chartjs' or 'matplotlib'
+ */
+function switchRenderingEngine(engine) {
+    if (currentEngine === engine) return;
+
+    currentEngine = engine;
+
+    // Update toggle button states
+    const toggleButtons = document.querySelectorAll('.engine-toggle .toggle-btn');
+    toggleButtons.forEach(btn => {
+        if (btn.dataset.engine === engine) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Show/hide appropriate chart wrappers with smooth transition
+    const allWrappers = document.querySelectorAll('.chart-wrapper');
+    allWrappers.forEach(wrapper => {
+        const wrapperEngine = wrapper.dataset.engine;
+
+        if (wrapperEngine === engine) {
+            // Show with fade-in effect
+            wrapper.classList.remove('hidden');
+            setTimeout(() => wrapper.classList.add('visible'), 10);
+        } else {
+            // Hide with fade-out effect
+            wrapper.classList.remove('visible');
+            setTimeout(() => wrapper.classList.add('hidden'), 300);
+        }
+    });
+
+    console.log(`Switched to ${engine} rendering engine`);
+}
 
 // Brand colors following design principles
 const colors = {
@@ -1370,13 +1427,16 @@ function createCPIComparisonChart() {
 // Initialize dashboard
 async function initDashboard() {
     console.log('Initializing Chile Economic Indicators Dashboard...');
-    
-    // Show loading state with spinner
-    const chartWrappers = document.querySelectorAll('.chart-wrapper');
+
+    // Initialize rendering engine toggle
+    initEngineToggle();
+
+    // Show loading state with spinner (only on Chart.js wrappers)
+    const chartWrappers = document.querySelectorAll('.chart-wrapper[data-engine="chartjs"]');
     chartWrappers.forEach(wrapper => {
         wrapper.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading economic data from BCCh API...</div>';
     });
-    
+
     // Load data
     const data = await loadSeriesData();
     if (!data) {
@@ -1386,8 +1446,8 @@ async function initDashboard() {
     // Restore canvas elements and create charts - Only 3 charts now
     setTimeout(() => {
         try {
-            // Restore canvas elements for 3 charts matching notebook
-            const chartWrappers = document.querySelectorAll('.chart-wrapper');
+            // Restore canvas elements for 3 Chart.js charts
+            const chartWrappers = document.querySelectorAll('.chart-wrapper[data-engine="chartjs"]');
             chartWrappers[0].innerHTML = '<canvas id="unemploymentImacecChart"></canvas>';
             chartWrappers[1].innerHTML = '<canvas id="exchangeCopperChart"></canvas>';
             chartWrappers[2].innerHTML = '<canvas id="cpiComparisonChart"></canvas>';

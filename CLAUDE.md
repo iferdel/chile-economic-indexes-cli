@@ -20,11 +20,13 @@ This is a CLI tool for interacting with the Banco Central de Chile (BCCh) API, b
 
 ### Project Structure
 - `bcch/` - Main CLI application entry point and command definitions
+  - `cmd/` - CLI command implementations
+  - `python/` - Matplotlib chart generation (Python/uv project)
+  - `public/` - Static files for the visualization web server
 - `internal/bcch-api/` - BCCh API client with authentication and HTTP handling
 - `internal/bcch-cache/` - Time-based caching system for API responses (24h default)
 - `internal/fileio/` - JSON file operations for data export
 - `internal/spinner/` - Loading spinner for user experience
-- `public/` - Static files for the visualization web server
 
 ### Key Components
 
@@ -59,12 +61,69 @@ The application includes predefined sets of economic indicators (defined in `bcc
 - `EMPLOYMENT` - Employment relation between different regions with 8 series IDs (
 
 ## Visual Development
+
+### Dual Rendering System
+
+The visualization dashboard supports **two rendering engines** that can be toggled in the browser:
+
+1. **Chart.js (JavaScript)** - Interactive, client-side charts with hover tooltips and animations
+2. **Matplotlib (Python)** - Publication-quality static images generated server-side
+
+### Architecture
+
 - Hybrid HTTP server serving both static files and REST API endpoints
 - Static files: HTML, CSS, JS from `public/` directory (embedded in binary)
 - API endpoints: `/api/sets/{set}` for dynamic data fetching from BCCh
 - Automatic browser opening after 2-second delay
 - Configurable port (default 49966)
-- Data flows: CLI → HTTP Server → API Endpoint → BCCh API → JSON Response → Frontend Charts
+- Data flows:
+  - **Chart.js**: CLI → HTTP Server → API Endpoint → BCCh API → JSON Response → Frontend Charts
+  - **Matplotlib**: CLI → Python Script → PNG/SVG Images → Served by HTTP Server
+
+### Python/Matplotlib Setup
+
+**Prerequisites:**
+1. Install [uv](https://github.com/astral-sh/uv) - Fast Python package installer
+   ```bash
+   # macOS/Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+2. Python 3.11+
+
+**First-time setup:**
+```bash
+cd bcch/python
+uv sync  # Installs matplotlib, numpy, creates venv
+```
+
+**How it works:**
+- When running `bcch viz`, the Go server automatically calls Python via `uv run`
+- Python generates matplotlib charts as PNG files in `bcch/public/img/`
+- Charts are served alongside the HTML page
+- Users can toggle between Chart.js and Matplotlib in the browser
+- If Python/uv is not available, the system gracefully falls back to Chart.js only
+
+### Matplotlib Playground
+
+The `bcch/python/charts/` directory contains modular chart generation scripts:
+- `unemployment.py` - Unemployment + Imacec dual Y-axis chart
+- `exchange.py` - Exchange rate + Copper price chart
+- `cpi.py` - CPI comparison (Chile vs USA)
+
+Each file is heavily commented with `PLAYGROUND` markers showing customization opportunities:
+- Color schemes and palettes
+- Line styles and markers
+- Annotations and statistical overlays
+- Grid and axis styling
+- Legend positioning
+
+**Development workflow:**
+1. Edit chart modules in `bcch/python/charts/`
+2. Run `bcch viz` to regenerate charts
+3. Toggle between Chart.js and Matplotlib in browser to compare
+4. Iterate and refine
+
+See `bcch/python/README.md` for detailed Python setup and customization guide.
 
 **MUST** use the dev tool to disable cache and thus being able to see the changes whenever refreshing the page.
 

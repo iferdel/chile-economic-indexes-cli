@@ -215,3 +215,122 @@ footer p {
     color: var(--text-primary);
     font-weight: 500;
 }
+
+/* ============================================================================
+   Rendering Engine Toggle
+   ============================================================================ */
+
+.engine-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--very-light-neutral);
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+}
+
+.toggle-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.toggle-buttons {
+    display: flex;
+    gap: var(--space-xs);
+    background: var(--background);
+    padding: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background: var(--very-light-neutral);
+    color: var(--text-primary);
+}
+
+.toggle-btn.active {
+    background: var(--brand-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(105, 179, 162, 0.3);
+}
+
+.toggle-btn .toggle-icon {
+    font-size: 16px;
+}
+
+/* ============================================================================
+   Chart Wrapper Transitions
+   ============================================================================ */
+
+.chart-wrapper {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.chart-wrapper.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.chart-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================================================
+   Matplotlib Chart Styling
+   ============================================================================ */
+
+.matplotlib-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+}
+
+/* Ensure matplotlib images are properly sized */
+.chart-wrapper[data-engine="matplotlib"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    min-height: 400px;
+}
+
+/* Responsive adjustments for toggle */
+@media (max-width: 768px) {
+    .engine-toggle {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .toggle-buttons {
+        width: 100%;
+    }
+
+    .toggle-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}

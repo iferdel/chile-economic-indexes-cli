@@ -14,7 +14,7 @@ func SaveSeriesToJSON(payload any, filename string) error {
 	if strings.Contains(cleanPath, "..") || filepath.IsAbs(cleanPath) {
 		return errors.New("invalid filename: path traversal or absolute path not allowed")
 	}
-	
+
 	file, err := os.Create(cleanPath)
 	if err != nil {
 		return err
