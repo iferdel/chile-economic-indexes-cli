@@ -15,12 +15,27 @@
         <header>
             <h1>Chile Economic Indicators Dashboard</h1>
             <p class="data-source">Data source: Banco Central de Chile (BCCh)</p>
+
+            <!-- Rendering Engine Toggle -->
+            <div class="engine-toggle">
+                <span class="toggle-label">Rendering Engine:</span>
+                <div class="toggle-buttons">
+                    <button class="toggle-btn active" data-engine="chartjs">
+                        <span class="toggle-icon">📊</span>
+                        Chart.js (Interactive)
+                    </button>
+                    <button class="toggle-btn" data-engine="matplotlib">
+                        <span class="toggle-icon">🐍</span>
+                        Matplotlib (Python)
+                    </button>
+                </div>
+            </div>
         </header>
 
         <main>
             <div class="data-info">
-                <strong>Chilean Economic Dashboard</strong> - Real-time visualization of key economic indicators from Banco Central de Chile (BCCh). 
-                Data is automatically updated and covers the period from 2010 to present, showing <strong>unemployment trends</strong>, 
+                <strong>Chilean Economic Dashboard</strong> - Real-time visualization of key economic indicators from Banco Central de Chile (BCCh).
+                Data is automatically updated and covers the period from 2010 to present, showing <strong>unemployment trends</strong>,
                 <strong>currency exchange rates</strong>, and <strong>inflation comparisons</strong> across different regions and time periods.
             </div>
 
@@ -32,8 +47,13 @@
                         National unemployment trends compared with two contrasting regional economies: <strong>Antofagasta</strong> (Chile's largest mining region, contributing 72% of regional GDP and 18.4% of national mining employment) and <strong>Ñuble</strong> (Chile's most rural region, with 30.6% rural population). The dual Y-axis includes Chile's Monthly Index of Economic Activity (Imacec) to reveal how economic cycles affect employment across different economic structures.
                     </p>
                 </div>
-                <div class="chart-wrapper">
+                <!-- Chart.js Version -->
+                <div class="chart-wrapper" data-engine="chartjs">
                     <canvas id="unemploymentImacecChart"></canvas>
+                </div>
+                <!-- Matplotlib Version -->
+                <div class="chart-wrapper hidden" data-engine="matplotlib">
+                    <img src="img/unemployment_imacec.png" alt="Unemployment Rate & Imacec - Matplotlib" class="matplotlib-chart">
                 </div>
             </div>
             
@@ -42,8 +62,13 @@
                 <div class="chart-header">
                     <h2>Chilean Currency Exchange Rate & Copper Value</h2>
                 </div>
-                <div class="chart-wrapper">
+                <!-- Chart.js Version -->
+                <div class="chart-wrapper" data-engine="chartjs">
                     <canvas id="exchangeCopperChart"></canvas>
+                </div>
+                <!-- Matplotlib Version -->
+                <div class="chart-wrapper hidden" data-engine="matplotlib">
+                    <img src="img/exchange_copper.png" alt="Exchange Rate & Copper Price - Matplotlib" class="matplotlib-chart">
                 </div>
             </div>
 
@@ -52,8 +77,13 @@
                 <div class="chart-header">
                     <h2>Consumer Price Index Comparison: Chile vs USA</h2>
                 </div>
-                <div class="chart-wrapper">
+                <!-- Chart.js Version -->
+                <div class="chart-wrapper" data-engine="chartjs">
                     <canvas id="cpiComparisonChart"></canvas>
+                </div>
+                <!-- Matplotlib Version -->
+                <div class="chart-wrapper hidden" data-engine="matplotlib">
+                    <img src="img/cpi_comparison.png" alt="CPI Comparison - Matplotlib" class="matplotlib-chart">
                 </div>
             </div>
         </main>

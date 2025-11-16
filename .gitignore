@@ -38,3 +38,20 @@ series.json
 
 # Claude + MCP
 .playwright-mcp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.uv/
+uv.lock
+
+# Matplotlib generated charts
+bcch/public/img/*.png
+bcch/public/img/*.svg
